@@ -8,7 +8,7 @@ Guerra Antonio
 Zambello Nicola  
   
 ## Esercizio 1
-
+Partendo dal secondo esercizio sviluppato per il I gruppo di esercizi, sviluppate un’applicazione permetta di utilizzare il texture mapping con i seguenti solidi geometrici: cubo, sfera, cono, cilindro, toro, specificando nella sezione initBuffer delle varie geometrie l’associazione coordinate di texture-vertici. Esempi del risultato del corretto texture mapping sono riportate nella tabella presente nella pagina. L’applicazione deve permettere di selezionare la geometria per mezzo di menu gestito tramite dat.gui. Verificate il texture mapping con l’ausilio delle texture allegate all’esercizio.
 
 ## Esercizio 2
 
