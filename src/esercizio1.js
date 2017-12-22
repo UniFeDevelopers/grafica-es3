@@ -76,7 +76,6 @@ class Cube extends Shape {
       0.0, 0.0,   1.0, 0.0,   1.0, 1.0,   0.0, 1.0   // v4-v7-v6-v5 back
     ]
 
-    // Indices of the vertices
     // prettier-ignore
     this.indices = [
       0,  1,  2,   0, 2,  3,     // front
@@ -215,9 +214,6 @@ class Sphere extends Shape {
         let theta = i * 2 * Math.PI / nDiv
 
         // Il calcolo delle coordinate di un vertice avviene tramite le equazioni parametriche della sfera.
-        // let x = Math.cos(phi) * Math.sin(theta)
-        // let y = Math.sin(phi) * Math.sin(theta)
-        // let z = Math.cos(theta)
         let x = Math.sin(theta) * Math.sin(phi)
         let y = Math.cos(phi)
         let z = Math.cos(theta) * Math.sin(phi)
@@ -289,7 +285,7 @@ const main = () => {
   canvas.setAttribute('height', window.innerHeight)
 
   // Get the rendering context for WebGL
-  var gl = getWebGLContext(canvas)
+  const gl = getWebGLContext(canvas)
   if (!gl) {
     console.log('Failed to get the rendering context for WebGL')
     return
@@ -321,7 +317,7 @@ const main = () => {
   gl.enable(gl.DEPTH_TEST)
 
   // Get the storage locations of uniform variables and so on
-  var u_MvpMatrix = gl.getUniformLocation(gl.program, 'u_MvpMatrix')
+  const u_MvpMatrix = gl.getUniformLocation(gl.program, 'u_MvpMatrix')
   if (!u_MvpMatrix) {
     console.log('Failed to get the storage location')
     return
@@ -340,7 +336,7 @@ const main = () => {
   const shapeOptions = {
     cone: [200, 1, 2],
     cylinder: [100, 1, 2],
-    sphere: [64, 1],
+    sphere: [100, 1],
     torus: [100, 1, 0.2],
   }
 
@@ -539,7 +535,7 @@ const initArrayBuffer = (gl, attribute, data, type, num) => {
   gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW)
 
   // Assign the buffer object to the attribute variable
-  var a_attribute = gl.getAttribLocation(gl.program, attribute)
+  let a_attribute = gl.getAttribLocation(gl.program, attribute)
   if (a_attribute < 0) {
     console.log('Failed to get the storage location of ' + attribute)
     return false

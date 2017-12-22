@@ -164,7 +164,6 @@ var Cube = (function(_Shape) {
     0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0 // v4-v7-v6-v5 back
     ];
 
-    // Indices of the vertices
     // prettier-ignore
     _this.indices = [0, 1, 2, 0, 2, 3, // front
     4, 5, 6, 4, 6, 7, // right
@@ -323,9 +322,6 @@ var Sphere = (function(_Shape4) {
         var theta = i * 2 * Math.PI / nDiv
 
         // Il calcolo delle coordinate di un vertice avviene tramite le equazioni parametriche della sfera.
-        // let x = Math.cos(phi) * Math.sin(theta)
-        // let y = Math.sin(phi) * Math.sin(theta)
-        // let z = Math.cos(theta)
         var x = Math.sin(theta) * Math.sin(phi)
         var y = Math.cos(phi)
         var z = Math.cos(theta) * Math.sin(phi)
@@ -333,7 +329,7 @@ var Sphere = (function(_Shape4) {
         _this4.vertices.push(radius * x, radius * y, radius * z)
 
         var u = theta / (2 * Math.PI)
-        var v = 1 - phi
+        var v = 1 - phi / Math.PI
 
         _this4.texCoord.push(u, v)
       }
