@@ -481,6 +481,7 @@ var main = function main() {
     vpMatrix.lookAt.apply(vpMatrix, _toConsumableArray(shape.cameraPos.elements).concat([0, 0, 0, 0, 1, 0]))
 
     n = initVertexBuffers(gl, shape)
+    console.log('%cShape: %cCube', 'font-weight: 600', 'font-weight: 400')
 
     // Iterate over all controllers
     var _iteratorNormalCompletion = true
@@ -530,6 +531,7 @@ var main = function main() {
     vpMatrix.lookAt.apply(vpMatrix, _toConsumableArray(shape.cameraPos.elements).concat([0, 0, 0, 0, 1, 0]))
 
     n = initVertexBuffers(gl, shape)
+    console.log('%cShape: %cCone', 'font-weight: 600', 'font-weight: 400')
 
     // Iterate over all controllers
     var _iteratorNormalCompletion2 = true
@@ -579,6 +581,7 @@ var main = function main() {
     vpMatrix.lookAt.apply(vpMatrix, _toConsumableArray(shape.cameraPos.elements).concat([0, 0, 0, 0, 1, 0]))
 
     n = initVertexBuffers(gl, shape)
+    console.log('%cShape: %cCylinder', 'font-weight: 600', 'font-weight: 400')
 
     // Iterate over all controllers
     var _iteratorNormalCompletion3 = true
@@ -628,6 +631,7 @@ var main = function main() {
     vpMatrix.lookAt.apply(vpMatrix, _toConsumableArray(shape.cameraPos.elements).concat([0, 0, 0, 0, 1, 0]))
 
     n = initVertexBuffers(gl, shape)
+    console.log('%cShape: %cSphere', 'font-weight: 600', 'font-weight: 400')
 
     // Iterate over all controllers
     var _iteratorNormalCompletion4 = true
@@ -677,6 +681,7 @@ var main = function main() {
     vpMatrix.lookAt.apply(vpMatrix, _toConsumableArray(shape.cameraPos.elements).concat([0, 0, 0, 0, 1, 0]))
 
     n = initVertexBuffers(gl, shape)
+    console.log('%cShape: %cTorus', 'font-weight: 600', 'font-weight: 400')
 
     // Iterate over all controllers
     var _iteratorNormalCompletion5 = true
@@ -832,9 +837,26 @@ var initTextures = function initTextures(gl) {
   }
 
   // Tell the browser to load an image
-  image.src = './textures/ash_uvgrid01.jpg'
+  image.src = getImageURL()
+
+  // Update texture on radio-button change
+  document.querySelector('.radio-model').onchange = function(e) {
+    image.src = getImageURL()
+    console.log('%cTexture: %c' + image.src, 'font-weight: 600', 'font-weight: 400')
+  }
 
   return true
+}
+
+var getImageURL = function getImageURL() {
+  var baseURL = './textures/'
+  var imgName = 'ash_uvgrid01'
+
+  if (document.querySelector('input[name="texture-image"]:checked')) {
+    imgName = document.querySelector('input[name="texture-image"]:checked').value
+  }
+
+  return '' + baseURL + imgName + '.jpg'
 }
 
 var loadTexture = function loadTexture(gl, texture, u_Sampler, image) {

@@ -363,6 +363,7 @@ const main = () => {
     vpMatrix.lookAt(...shape.cameraPos.elements, 0, 0, 0, 0, 1, 0)
 
     n = initVertexBuffers(gl, shape)
+    console.log('%cShape: %cCube', 'font-weight: 600', 'font-weight: 400')
 
     // Iterate over all controllers
     for (let ctrl of gui.__controllers) {
@@ -387,6 +388,7 @@ const main = () => {
     vpMatrix.lookAt(...shape.cameraPos.elements, 0, 0, 0, 0, 1, 0)
 
     n = initVertexBuffers(gl, shape)
+    console.log('%cShape: %cCone', 'font-weight: 600', 'font-weight: 400')
 
     // Iterate over all controllers
     for (let ctrl of gui.__controllers) {
@@ -411,6 +413,7 @@ const main = () => {
     vpMatrix.lookAt(...shape.cameraPos.elements, 0, 0, 0, 0, 1, 0)
 
     n = initVertexBuffers(gl, shape)
+    console.log('%cShape: %cCylinder', 'font-weight: 600', 'font-weight: 400')
 
     // Iterate over all controllers
     for (let ctrl of gui.__controllers) {
@@ -435,6 +438,7 @@ const main = () => {
     vpMatrix.lookAt(...shape.cameraPos.elements, 0, 0, 0, 0, 1, 0)
 
     n = initVertexBuffers(gl, shape)
+    console.log('%cShape: %cSphere', 'font-weight: 600', 'font-weight: 400')
 
     // Iterate over all controllers
     for (let ctrl of gui.__controllers) {
@@ -459,6 +463,7 @@ const main = () => {
     vpMatrix.lookAt(...shape.cameraPos.elements, 0, 0, 0, 0, 1, 0)
 
     n = initVertexBuffers(gl, shape)
+    console.log('%cShape: %cTorus', 'font-weight: 600', 'font-weight: 400')
 
     // Iterate over all controllers
     for (let ctrl of gui.__controllers) {
@@ -589,9 +594,26 @@ const initTextures = gl => {
   }
 
   // Tell the browser to load an image
-  image.src = './textures/ash_uvgrid01.jpg'
+  image.src = getImageURL()
+
+  // Update texture on radio-button change
+  document.querySelector('.radio-model').onchange = e => {
+    image.src = getImageURL()
+    console.log(`%cTexture: %c${image.src}`, 'font-weight: 600', 'font-weight: 400')
+  }
 
   return true
+}
+
+const getImageURL = () => {
+  const baseURL = './textures/'
+  let imgName = 'ash_uvgrid01'
+
+  if (document.querySelector('input[name="texture-image"]:checked')) {
+    imgName = document.querySelector('input[name="texture-image"]:checked').value
+  }
+
+  return `${baseURL}${imgName}.jpg`
 }
 
 const loadTexture = (gl, texture, u_Sampler, image) => {

@@ -9,6 +9,23 @@ body .dg.main .close-button {
   border: 1px solid #e3e3e3;
   border-top: 0;
 }
+body .radio-model {
+  position: fixed;
+  bottom: 5px;
+  left: 5px;
+  font-size: 0.8em;
+  font-weight: 300;
+  text-align: left;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.2);
+  color: #eee;
+  border-radius: 10px;
+}
+body .radio-model .radio-model-title {
+  margin: 0 0 10px;
+  font-size: 1.15em;
+  color: #ccc;
+}
 body .link-esercizi {
   display: -webkit-box;
   display: -webkit-flex;
