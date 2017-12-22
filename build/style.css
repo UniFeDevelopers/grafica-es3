@@ -9,7 +9,7 @@ body .dg.main .close-button {
   border: 1px solid #e3e3e3;
   border-top: 0;
 }
-body .radio-model {
+body .radio-component {
   position: fixed;
   bottom: 5px;
   left: 5px;
@@ -21,7 +21,7 @@ body .radio-model {
   color: #eee;
   border-radius: 10px;
 }
-body .radio-model .radio-model-title {
+body .radio-component .radio-component-title {
   margin: 0 0 10px;
   font-size: 1.15em;
   color: #ccc;

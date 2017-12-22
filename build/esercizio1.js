@@ -840,7 +840,7 @@ var initTextures = function initTextures(gl) {
   image.src = getImageURL()
 
   // Update texture on radio-button change
-  document.querySelector('.radio-model').onchange = function(e) {
+  document.querySelector('.radio-component').onchange = function(e) {
     image.src = getImageURL()
     console.log('%cTexture: %c' + image.src, 'font-weight: 600', 'font-weight: 400')
   }

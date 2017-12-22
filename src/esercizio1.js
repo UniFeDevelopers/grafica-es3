@@ -597,7 +597,7 @@ const initTextures = gl => {
   image.src = getImageURL()
 
   // Update texture on radio-button change
-  document.querySelector('.radio-model').onchange = e => {
+  document.querySelector('.radio-component').onchange = e => {
     image.src = getImageURL()
     console.log(`%cTexture: %c${image.src}`, 'font-weight: 600', 'font-weight: 400')
   }
