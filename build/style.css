@@ -1,20 +1,15 @@
 body {
   margin: 0;
+  background: #000;
   overflow: hidden;
+  text-align: center;
   font-family: sans-serif;
 }
-body.redirect {
-  padding: 20px;
-}
-body.es2 {
-  background: #000;
-  text-align: center;
-}
-body.es2 .dg.main .close-button {
+body .dg.main .close-button {
   border: 1px solid #e3e3e3;
   border-top: 0;
 }
-.link-esercizi {
+body .link-esercizi {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -24,53 +19,63 @@ body.es2 .dg.main .close-button {
   -webkit-flex-flow: row nowrap;
   -ms-flex-flow: row nowrap;
   flex-flow: row nowrap;
-  text-align: center;
+  margin: 40px auto;
+  -webkit-box-pack: space-evenly;
+  -webkit-justify-content: space-evenly;
+  -ms-flex-pack: space-evenly;
+  justify-content: space-evenly;
+  max-width: 1024px;
 }
-.link-esercizi a.esercizio {
-  width: 50%;
+body .esercizio a {
+  display: block;
+  border: 2px solid;
+  border-radius: 5px;
+  padding: 10px;
+  text-decoration: none;
+}
+body .esercizio a:hover,
+body .esercizio a:focus {
+  background: rgba(200, 200, 200, 0.25);
+}
+body .esercizio a:hover span,
+body .esercizio a:focus span {
+  border-bottom: 1px solid;
+}
+body .link-home {
+  position: fixed;
+  top: 15px;
+  left: 15px;
+}
+body .link-home .esercizio a {
+  color: #fff;
+  border-color: #fff;
+}
+body .link-home .esercizio a:before {
+  content: '\2190';
+  display: inline-block;
+}
+body .link-home .esercizio a:visited,
+body .link-home .esercizio a:link {
+  color: #fff;
+}
+body.redirect {
+  background: none;
   padding: 20px;
 }
-input#color-input {
-  position: fixed;
-  top: 10px;
-  right: 10px;
-  width: 50px;
-  height: 50px;
-  border-radius: 10px;
-  cursor: pointer;
+body.redirect h1 {
+  font-weight: 300;
 }
-.help-button {
-  position: fixed;
-  top: 10px;
-  left: 10px;
+body.redirect .esercizio {
+  width: 50%;
+  max-width: 250px;
+  padding: 20px;
 }
-.help-button .help-icon {
-  background: rgba(0, 0, 0, 0.5);
-  color: #fff;
-  width: 15px;
-  height: 15px;
-  text-align: center;
-  border-radius: 100%;
-  font-style: normal;
-  padding: 5px 11px;
-  font-weight: 100;
-  font-size: 1.1em;
-  cursor: help;
-  box-sizing: border-box;
+body.redirect .esercizio a {
+  color: #333;
+  border-color: #333;
 }
-.help-button p.help-label {
-  display: none;
-  padding: 10px 15px;
-  background: rgba(0, 0, 0, 0.5);
-  color: #fff;
-  margin: 5px 0;
-  font-size: 0.9em;
-  font-weight: 100;
-  line-height: 1.3em;
-  border-radius: 10px;
-}
-.help-button:hover p.help-label,
-.help-button:focus p.help-label {
-  display: block;
+body.redirect .esercizio a:visited,
+body.redirect .esercizio a:link {
+  color: #333;
 }
 /*# sourceMappingURL=style.css.map */
