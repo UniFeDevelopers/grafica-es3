@@ -1,5 +1,5 @@
 /*
-  Esercitazione 3 - Esercizio 2
+  Esercitazione 3 - Esercizio 1
 
   Gruppo:
     - Bulzoni Federico
@@ -10,13 +10,13 @@
 // Vertex shader program
 const vertexShaderSource = `
   attribute vec4 a_Position;   // Vertex coordinates
-  attribute vec4 a_Color;      // Vertex Color
   uniform mat4 u_MvpMatrix;    // Model-View-Projection Matrix
-  varying vec4 v_Color;        // vertex color
+  attribute vec2 a_TexCoord;
+  varying vec2 v_TexCoord;
 
   void main() {
     gl_Position = u_MvpMatrix * a_Position;
-    v_Color = normalize(a_Color);
+    v_TexCoord = a_TexCoord;
   }
 `
 
@@ -25,24 +25,26 @@ const fragmentShaderSource = `
   #ifdef GL_ES
   precision mediump float;
   #endif
-  varying vec4 v_Color;
+
+  uniform sampler2D u_Sampler;
+  varying vec2 v_TexCoord;
 
   void main() {
-    gl_FragColor = v_Color;
+    gl_FragColor = texture2D(u_Sampler, v_TexCoord);
   }
 `
 
 class Shape {
   constructor() {
     this.vertices = []
-    this.colors = []
+    this.texCoord = []
     this.indices = []
     this.cameraPos = new Vector3([0.0, 0.0, 6.0])
   }
 }
 
 class Cube extends Shape {
-  constructor(color) {
+  constructor() {
     super()
     // Create a cube
     //    v6----- v5
@@ -64,20 +66,15 @@ class Cube extends Shape {
       1.0,-1.0,-1.0,   -1.0,-1.0,-1.0,  -1.0, 1.0,-1.0,  1.0, 1.0,-1.0   // v4-v7-v6-v5 back
     ]
 
-    // Colors
     // prettier-ignore
-    // this.colors = [
-    //   1, 0, 0,   1, 0, 0,   1, 0, 0,  1, 0, 0,     // v0-v1-v2-v3 front
-    //   1, 0, 0,   1, 0, 0,   1, 0, 0,  1, 0, 0,     // v0-v3-v4-v5 right
-    //   1, 0, 0,   1, 0, 0,   1, 0, 0,  1, 0, 0,     // v0-v5-v6-v1 up
-    //   1, 0, 0,   1, 0, 0,   1, 0, 0,  1, 0, 0,     // v1-v6-v7-v2 left
-    //   1, 0, 0,   1, 0, 0,   1, 0, 0,  1, 0, 0,     // v7-v4-v3-v2 down
-    //   1, 0, 0,   1, 0, 0,   1, 0, 0,  1, 0, 0      // v4-v7-v6-v5 back
-    // ]
-    this.colors = []
-    for (let i = 0; i < this.vertices.length; i += 3) {
-      this.colors.push(...color)
-    }
+    this.texCoord = [
+      1.0, 1.0,   0.0, 1.0,   0.0, 0.0,   1.0, 0.0,  // v0-v1-v2-v3 front
+      0.0, 1.0,   0.0, 0.0,   1.0, 0.0,   1.0, 1.0,  // v0-v3-v4-v5 right
+      1.0, 0.0,   1.0, 1.0,   0.0, 1.0,   0.0, 0.0,  // v0-v5-v6-v1 up
+      1.0, 1.0,   0.0, 1.0,   0.0, 0.0,   1.0, 0.0,  // v1-v6-v7-v2 left
+      0.0, 0.0,   1.0, 0.0,   1.0, 1.0,   0.0, 1.0,  // v7-v4-v3-v2 down
+      0.0, 0.0,   1.0, 0.0,   1.0, 1.0,   0.0, 1.0   // v4-v7-v6-v5 back
+    ]
 
     // Indices of the vertices
     // prettier-ignore
@@ -95,7 +92,7 @@ class Cube extends Shape {
 }
 
 class Cone extends Shape {
-  constructor(nDiv, radius, height, color) {
+  constructor(nDiv, radius, height) {
     super()
 
     const numberVertices = nDiv + 2
@@ -104,10 +101,8 @@ class Cone extends Shape {
     const top = [0.0, height, 0.0]
 
     this.vertices.push(...centre)
-    this.colors.push(...color)
 
     this.vertices.push(...top)
-    this.colors.push(...color)
 
     // genero tutti i vertici
     for (let i = 2, angle = 0; i < numberVertices; i++, angle += angleStep) {
@@ -116,17 +111,16 @@ class Cone extends Shape {
       let y = centre[1]
 
       this.vertices.push(x, y, z)
-      this.colors.push(...color)
-
-      // collego il centro al top ed al nostro vertice
-      this.indices.push(0, 1, i)
 
       if (i < numberVertices - 1) {
-        // ossia collego il centro, il nostro vertice, e quello successivo
+        // Collego il vertice al suo precedente e al top.
         this.indices.push(0, i, i + 1)
+        // Collego il vertice al suo precedente e al centro basso.
+        this.indices.push(1, i, i + 1)
       } else {
-        // ossia collego il centro, il nostro vertice, e il primo vertice della circonferenza
+        // Nel caso sia l'ultimo vertice allora lo collego col primo sulla circonferenza.
         this.indices.push(0, i, 2)
+        this.indices.push(1, i, 2)
       }
     }
 
@@ -135,7 +129,7 @@ class Cone extends Shape {
 }
 
 class Cylinder extends Shape {
-  constructor(nDiv, radius, height, color) {
+  constructor(nDiv, radius, height) {
     super()
 
     const angleStep = 2 * Math.PI / nDiv
@@ -145,10 +139,8 @@ class Cylinder extends Shape {
     const centreTop = [0.0, height, 0.0]
 
     this.vertices.push(...centreBottom) // Indice 0
-    this.colors.push(...color)
 
     this.vertices.push(...centreTop) // Indice 1
-    this.colors.push(...color)
 
     // Carico dalla posizione 2 ad nDiv + 1 i vertici della circonferenza inferiore.
     for (let i = 0, angle = 0; i < nDiv; i++, angle += angleStep) {
@@ -156,7 +148,6 @@ class Cylinder extends Shape {
       let z = Math.sin(angle) * radius
 
       this.vertices.push(x, centreBottom[1], z) // i ed è il vertice in basso
-      this.colors.push(...color)
     }
 
     // Carico dalla posizione nDiv + 2 ad 2*nDiv + 1 i vertici della circonferenza superiore
@@ -165,7 +156,6 @@ class Cylinder extends Shape {
       let z = Math.sin(angle) * radius
 
       this.vertices.push(x, centreTop[1], z) // i ed è il vertice in basso
-      this.colors.push(...color)
     }
 
     // Itero da 0 a nDiv - 1 per inserire gli indici nel buffer.
@@ -208,7 +198,7 @@ class Cylinder extends Shape {
 }
 
 class Sphere extends Shape {
-  constructor(nDiv, radius, color) {
+  constructor(nDiv, radius) {
     super()
 
     // Per disegnare una sfera abbiamo bisogno di nDiv^2 vertici.
@@ -225,12 +215,19 @@ class Sphere extends Shape {
         let theta = i * 2 * Math.PI / nDiv
 
         // Il calcolo delle coordinate di un vertice avviene tramite le equazioni parametriche della sfera.
-        let x = radius * Math.cos(phi) * Math.sin(theta)
-        let y = radius * Math.sin(phi) * Math.sin(theta)
-        let z = radius * Math.cos(theta)
+        // let x = Math.cos(phi) * Math.sin(theta)
+        // let y = Math.sin(phi) * Math.sin(theta)
+        // let z = Math.cos(theta)
+        let x = Math.sin(theta) * Math.sin(phi)
+        let y = Math.cos(phi)
+        let z = Math.cos(theta) * Math.sin(phi)
 
-        this.vertices.push(x, y, z)
-        this.colors.push(...color)
+        this.vertices.push(radius * x, radius * y, radius * z)
+
+        let u = theta / (2 * Math.PI)
+        let v = 1 - phi
+
+        this.texCoord.push(u, v)
       }
     }
 
@@ -251,7 +248,7 @@ class Sphere extends Shape {
 }
 
 class Torus extends Shape {
-  constructor(nDiv, radius, radiusInner, color) {
+  constructor(nDiv, radius, radiusInner) {
     super()
 
     // I vertici e gli indici del toro vengono calcolati come per la sfera
@@ -270,7 +267,6 @@ class Torus extends Shape {
         let z = Math.sin(theta) * radiusInner
 
         this.vertices.push(x, y, z)
-        this.colors.push(...color)
       }
     }
 
@@ -288,7 +284,7 @@ class Torus extends Shape {
 
 const main = () => {
   // Retrieve <canvas> element
-  const canvas = document.querySelector('canvas#webgl-es2')
+  const canvas = document.querySelector('canvas#webgl-es3')
   canvas.setAttribute('width', window.innerWidth)
   canvas.setAttribute('height', window.innerHeight)
 
@@ -311,6 +307,12 @@ const main = () => {
   let n = initVertexBuffers(gl, shape)
   if (n < 0) {
     console.log('Failed to set the vertex information')
+    return
+  }
+
+  // Set texture
+  if (!initTextures(gl)) {
+    console.log('Failed to intialize the texture.')
     return
   }
 
@@ -347,54 +349,6 @@ const main = () => {
   const gui = new dat.GUI()
   // checkbox geometry
   let geometria = { cube: true, cone: false, cylinder: false, sphere: false, torus: false }
-  // color selector
-  let colore = { color0: [255, 0, 0] }
-
-  gui.addColor(colore, 'color0').onFinishChange(value => {
-    // aggiorna il valore del colore, normalizzandolo
-    colore = {
-      color0: value.map(col => {
-        return parseFloat(col.toFixed(2))
-      }),
-    }
-
-    for (let geom in geometria) {
-      if (geometria[geom] === true) {
-        // Aggiorna l'oggetto shape con la figura selezionata,
-        // passando i parametri definiti in shapeOptions
-        switch (geom) {
-        case 'cube':
-          shape = new Cube(colore.color0)
-          break
-
-        case 'cone':
-          shape = new Cone(...shapeOptions.cone, colore.color0)
-          break
-
-        case 'cylinder':
-          shape = new Cylinder(...shapeOptions.cylinder, colore.color0)
-          break
-
-        case 'sphere':
-          shape = new Sphere(...shapeOptions.sphere, colore.color0)
-          break
-
-        case 'torus':
-          shape = new Torus(...shapeOptions.torus, colore.color0)
-          break
-
-        default:
-          shape = new Cube(colore.color0)
-          break
-        }
-      }
-    }
-
-    // e re-inizializza i buffers e setta la posizione della camera
-    vpMatrix.setPerspective(30, canvas.width / canvas.height, 1, 1000)
-    vpMatrix.lookAt(...shape.cameraPos.elements, 0, 0, 0, 0, 1, 0)
-    n = initVertexBuffers(gl, shape)
-  })
 
   gui.add(geometria, 'cube').onFinishChange(value => {
     // Fires when a controller loses focus.
@@ -407,7 +361,7 @@ const main = () => {
     }
 
     // update shape object and re-init buffers
-    shape = new Cube(colore.color0)
+    shape = new Cube()
 
     vpMatrix.setPerspective(30, canvas.width / canvas.height, 1, 1000)
     vpMatrix.lookAt(...shape.cameraPos.elements, 0, 0, 0, 0, 1, 0)
@@ -431,7 +385,7 @@ const main = () => {
     }
 
     // update shape object and re-init buffers
-    shape = new Cone(...shapeOptions.cone, colore.color0)
+    shape = new Cone(...shapeOptions.cone)
 
     vpMatrix.setPerspective(30, canvas.width / canvas.height, 1, 1000)
     vpMatrix.lookAt(...shape.cameraPos.elements, 0, 0, 0, 0, 1, 0)
@@ -455,7 +409,7 @@ const main = () => {
     }
 
     // update shape object and re-init buffers
-    shape = new Cylinder(...shapeOptions.cylinder, colore.color0)
+    shape = new Cylinder(...shapeOptions.cylinder)
 
     vpMatrix.setPerspective(30, canvas.width / canvas.height, 1, 1000)
     vpMatrix.lookAt(...shape.cameraPos.elements, 0, 0, 0, 0, 1, 0)
@@ -479,7 +433,7 @@ const main = () => {
     }
 
     // update shape object and re-init buffers
-    shape = new Sphere(...shapeOptions.sphere, colore.color0)
+    shape = new Sphere(...shapeOptions.sphere)
 
     vpMatrix.setPerspective(30, canvas.width / canvas.height, 1, 1000)
     vpMatrix.lookAt(...shape.cameraPos.elements, 0, 0, 0, 0, 1, 0)
@@ -503,7 +457,7 @@ const main = () => {
     }
 
     // update shape object and re-init buffers
-    shape = new Torus(...shapeOptions.torus, colore.color0)
+    shape = new Torus(...shapeOptions.torus)
 
     vpMatrix.setPerspective(30, canvas.width / canvas.height, 1, 1000)
     vpMatrix.lookAt(...shape.cameraPos.elements, 0, 0, 0, 0, 1, 0)
@@ -530,7 +484,7 @@ const main = () => {
   const tick = () => {
     currentAngle = animate(currentAngle) // Update the rotation angle
     // Calculate the model matrix
-    modelMatrix.setRotate(currentAngle, 0, 1, -1) // Rotate around the axis
+    modelMatrix.setRotate(currentAngle, 0, 1, 0) // Rotate around the axis
 
     mvpMatrix.set(vpMatrix).multiply(modelMatrix)
     gl.uniformMatrix4fv(u_MvpMatrix, false, mvpMatrix.elements)
@@ -549,11 +503,11 @@ const main = () => {
 const initVertexBuffers = (gl, shape) => {
   const vertices = new Float32Array(shape.vertices)
   const indices = new Uint16Array(shape.indices)
-  const colors = new Float32Array(shape.colors)
+  const texCoord = new Float32Array(shape.texCoord)
 
   // Write the vertex property to buffers (coordinates, colors and normals)
-  if (!initArrayBuffer(gl, 'a_Position', vertices, 3, gl.FLOAT)) return -1
-  if (!initArrayBuffer(gl, 'a_Color', colors, 3, gl.FLOAT)) return -1
+  if (!initArrayBuffer(gl, 'a_Position', vertices, gl.FLOAT, 3)) return -1
+  if (!initArrayBuffer(gl, 'a_TexCoord', texCoord, gl.FLOAT, 2)) return -1
 
   // Unbind the buffer object
   gl.bindBuffer(gl.ARRAY_BUFFER, null)
@@ -570,7 +524,7 @@ const initVertexBuffers = (gl, shape) => {
   return indices.length
 }
 
-const initArrayBuffer = (gl, attribute, data, num, type) => {
+const initArrayBuffer = (gl, attribute, data, type, num) => {
   // Create a buffer object
   let buffer = gl.createBuffer()
   if (!buffer) {
@@ -611,6 +565,55 @@ const animate = angle => {
   // Update the current rotation angle (adjusted by the elapsed time)
   let newAngle = angle + ANGLE_STEP * elapsed / 200.0
   return (newAngle %= 360)
+}
+
+const initTextures = gl => {
+  const texture = gl.createTexture() // Create a texture object
+  if (!texture) {
+    console.log('Failed to create the texture object')
+    return false
+  }
+
+  // Get the storage location of u_Sampler
+  const u_Sampler = gl.getUniformLocation(gl.program, 'u_Sampler')
+  if (!u_Sampler) {
+    console.log('Failed to create the Sampler object')
+    return false
+  }
+
+  const image = new Image() // Create the image object
+  if (!image) {
+    console.log('Failed to create the image object')
+    return false
+  }
+
+  // Register the event handler to be called on loading an image
+  image.onload = function() {
+    loadTexture(gl, texture, u_Sampler, image)
+  }
+
+  // Tell the browser to load an image
+  image.src = './textures/ash_uvgrid01.jpg'
+
+  return true
+}
+
+const loadTexture = (gl, texture, u_Sampler, image) => {
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1) // Flip the image's y axis
+  // Enable texture unit0
+  gl.activeTexture(gl.TEXTURE0)
+  // Bind the texture object to the target
+  gl.bindTexture(gl.TEXTURE_2D, texture)
+
+  // Set the texture parameters
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+  // Set the texture image
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image)
+
+  // Set the texture unit 0 to the sampler
+  gl.uniform1i(u_Sampler, 0)
+
+  gl.clear(gl.COLOR_BUFFER_BIT) // Clear <canvas>
 }
 
 main()
