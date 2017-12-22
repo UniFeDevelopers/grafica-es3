@@ -225,7 +225,7 @@ class Sphere extends Shape {
         this.vertices.push(radius * x, radius * y, radius * z)
 
         let u = theta / (2 * Math.PI)
-        let v = 1 - phi
+        let v = 1 - phi / Math.PI
 
         this.texCoord.push(u, v)
       }
@@ -340,7 +340,7 @@ const main = () => {
   const shapeOptions = {
     cone: [200, 1, 2],
     cylinder: [100, 1, 2],
-    sphere: [100, 1],
+    sphere: [64, 1],
     torus: [100, 1, 0.2],
   }
 
