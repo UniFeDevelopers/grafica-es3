@@ -100,7 +100,7 @@ class Cone extends Shape {
     const top = [0.0, height, 0.0]
 
     this.vertices.push(...centre)
-    // Ci penso dopo.
+    // TODO: Ci penso dopo.
     this.texCoord.push(0.5, 0.0)
 
     this.vertices.push(...top)
@@ -130,7 +130,7 @@ class Cone extends Shape {
         this.indices.push(1, i, 2)
       }
     }
-    // debugger
+
     this.cameraPos = new Vector3([0.0, 0.0, 8.0])
   }
 }

@@ -196,7 +196,7 @@ var Cone = (function(_Shape2) {
     var top = [0.0, height, 0.0]
 
     ;(_this2$vertices = _this2.vertices).push.apply(_this2$vertices, centre)
-    // Ci penso dopo.
+    // TODO: Ci penso dopo.
     _this2.texCoord.push(0.5, 0.0)
 
     ;(_this2$vertices2 = _this2.vertices).push.apply(_this2$vertices2, top)
@@ -226,7 +226,7 @@ var Cone = (function(_Shape2) {
         _this2.indices.push(1, i, 2)
       }
     }
-    // debugger
+
     _this2.cameraPos = new Vector3([0.0, 0.0, 8.0])
     return _this2
   }
