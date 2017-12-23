@@ -606,14 +606,14 @@ const initTextures = gl => {
 }
 
 const getImageURL = () => {
-  const baseURL = './textures/'
+  const baseURL = './textures'
   let imgName = 'ash_uvgrid01'
 
   if (document.querySelector('input[name="texture-image"]:checked')) {
     imgName = document.querySelector('input[name="texture-image"]:checked').value
   }
 
-  return `${baseURL}${imgName}.jpg`
+  return `${baseURL}/${imgName}.jpg`
 }
 
 const loadTexture = (gl, texture, u_Sampler, image) => {
