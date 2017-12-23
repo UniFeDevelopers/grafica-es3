@@ -100,8 +100,12 @@ class Cone extends Shape {
     const top = [0.0, height, 0.0]
 
     this.vertices.push(...centre)
+    // Ci penso dopo.
+    this.texCoord.push(0.5, 0.0)
 
     this.vertices.push(...top)
+    // Il top sarà al centro sull'asse u, e al punto più alto nell'asse v.
+    this.texCoord.push(0.5, 1.0)
 
     // genero tutti i vertici
     for (let i = 2, angle = 0; i < numberVertices; i++, angle += angleStep) {
@@ -110,6 +114,10 @@ class Cone extends Shape {
       let y = centre[1]
 
       this.vertices.push(x, y, z)
+
+      let u = angle / (2 * Math.PI)
+      let v = 0.0
+      this.texCoord.push(u, v)
 
       if (i < numberVertices - 1) {
         // Collego il vertice al suo precedente e al top.
@@ -122,7 +130,7 @@ class Cone extends Shape {
         this.indices.push(1, i, 2)
       }
     }
-
+    // debugger
     this.cameraPos = new Vector3([0.0, 0.0, 8.0])
   }
 }
@@ -138,15 +146,21 @@ class Cylinder extends Shape {
     const centreTop = [0.0, height, 0.0]
 
     this.vertices.push(...centreBottom) // Indice 0
+    this.texCoord.push(0.5, 0.0)
 
     this.vertices.push(...centreTop) // Indice 1
+    this.texCoord.push(0.5, 1.0)
 
     // Carico dalla posizione 2 ad nDiv + 1 i vertici della circonferenza inferiore.
     for (let i = 0, angle = 0; i < nDiv; i++, angle += angleStep) {
       let x = Math.cos(angle) * radius
       let z = Math.sin(angle) * radius
 
+      let u = -angle / (2 * Math.PI)
+      let v = 0.0
+
       this.vertices.push(x, centreBottom[1], z) // i ed è il vertice in basso
+      this.texCoord.push(u, v)
     }
 
     // Carico dalla posizione nDiv + 2 ad 2*nDiv + 1 i vertici della circonferenza superiore
@@ -154,7 +168,11 @@ class Cylinder extends Shape {
       let x = Math.cos(angle) * radius
       let z = Math.sin(angle) * radius
 
+      let u = -angle / (2 * Math.PI)
+      let v = 1.0
+
       this.vertices.push(x, centreTop[1], z) // i ed è il vertice in basso
+      this.texCoord.push(u, v)
     }
 
     // Itero da 0 a nDiv - 1 per inserire gli indici nel buffer.
@@ -334,7 +352,7 @@ const main = () => {
   const mvpMatrix = new Matrix4() // Model view projection matrix
 
   const shapeOptions = {
-    cone: [200, 1, 2],
+    cone: [100, 1, 2],
     cylinder: [100, 1, 2],
     sphere: [100, 1],
     torus: [100, 1, 0.2],
@@ -485,7 +503,7 @@ const main = () => {
   const tick = () => {
     currentAngle = animate(currentAngle) // Update the rotation angle
     // Calculate the model matrix
-    modelMatrix.setRotate(currentAngle, 0, 1, 0) // Rotate around the axis
+    modelMatrix.setRotate(currentAngle, 1, 0, 0) // Rotate around the axis
 
     mvpMatrix.set(vpMatrix).multiply(modelMatrix)
     gl.uniformMatrix4fv(u_MvpMatrix, false, mvpMatrix.elements)
