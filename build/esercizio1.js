@@ -194,8 +194,14 @@ var Cone = (function(_Shape2) {
     var angleStep = 2 * Math.PI / nDiv
     var centre = [0.0, 0.0, 0.0]
     var top = [0.0, height, 0.0]
+
     ;(_this2$vertices = _this2.vertices).push.apply(_this2$vertices, centre)
+    // TODO: Ci penso dopo.
+    _this2.texCoord.push(0.5, 0.0)
+
     ;(_this2$vertices2 = _this2.vertices).push.apply(_this2$vertices2, top)
+    // Il top sarà al centro sull'asse u, e al punto più alto nell'asse v.
+    _this2.texCoord.push(0.5, 1.0)
 
     // genero tutti i vertici
     for (var i = 2, angle = 0; i < numberVertices; i++, angle += angleStep) {
@@ -204,6 +210,10 @@ var Cone = (function(_Shape2) {
       var y = centre[1]
 
       _this2.vertices.push(x, y, z)
+
+      var u = angle / (2 * Math.PI)
+      var v = 0.0
+      _this2.texCoord.push(u, v)
 
       if (i < numberVertices - 1) {
         // Collego il vertice al suo precedente e al top.
@@ -239,15 +249,23 @@ var Cylinder = (function(_Shape3) {
     // Due centri, uno in basso ed uno in alto.
     var centreBottom = [0.0, 0.0, 0.0]
     var centreTop = [0.0, height, 0.0]
+
     ;(_this3$vertices = _this3.vertices).push.apply(_this3$vertices, centreBottom) // Indice 0
+    _this3.texCoord.push(0.5, 0.0)
+
     ;(_this3$vertices2 = _this3.vertices).push.apply(_this3$vertices2, centreTop) // Indice 1
+    _this3.texCoord.push(0.5, 1.0)
 
     // Carico dalla posizione 2 ad nDiv + 1 i vertici della circonferenza inferiore.
     for (var i = 0, angle = 0; i < nDiv; i++, angle += angleStep) {
       var x = Math.cos(angle) * radius
       var z = Math.sin(angle) * radius
 
+      var u = -angle / (2 * Math.PI)
+      var v = 0.0
+
       _this3.vertices.push(x, centreBottom[1], z) // i ed è il vertice in basso
+      _this3.texCoord.push(u, v)
     }
 
     // Carico dalla posizione nDiv + 2 ad 2*nDiv + 1 i vertici della circonferenza superiore
@@ -255,7 +273,11 @@ var Cylinder = (function(_Shape3) {
       var _x = Math.cos(_angle) * radius
       var _z = Math.sin(_angle) * radius
 
+      var _u = -_angle / (2 * Math.PI)
+      var _v = 1.0
+
       _this3.vertices.push(_x, centreTop[1], _z) // i ed è il vertice in basso
+      _this3.texCoord.push(_u, _v)
     }
 
     // Itero da 0 a nDiv - 1 per inserire gli indici nel buffer.
@@ -452,7 +474,7 @@ var main = function main() {
   var mvpMatrix = new Matrix4() // Model view projection matrix
 
   var shapeOptions = {
-    cone: [200, 1, 2],
+    cone: [100, 1, 2],
     cylinder: [100, 1, 2],
     sphere: [100, 1],
     torus: [100, 1, 0.2],
@@ -728,7 +750,7 @@ var main = function main() {
   var tick = function tick() {
     currentAngle = animate(currentAngle) // Update the rotation angle
     // Calculate the model matrix
-    modelMatrix.setRotate(currentAngle, 0, 1, 0) // Rotate around the axis
+    modelMatrix.setRotate(currentAngle, 1, 0, 0) // Rotate around the axis
 
     mvpMatrix.set(vpMatrix).multiply(modelMatrix)
     gl.uniformMatrix4fv(u_MvpMatrix, false, mvpMatrix.elements)
