@@ -241,6 +241,15 @@ var Cube = (function(_Shape) {
 var Cone = (function(_Shape2) {
   _inherits(Cone, _Shape2)
 
+  _createClass(Cone, [
+    {
+      key: 'getTexCoord',
+      value: function getTexCoord(idx) {
+        return [this.texSuppo[2 * idx], this.texSuppo[2 * idx + 1]]
+      },
+    },
+  ])
+
   function Cone(nDiv, radius, height) {
     var _this3$vertices, _this3$vertices2
 
@@ -248,6 +257,7 @@ var Cone = (function(_Shape2) {
 
     var _this3 = _possibleConstructorReturn(this, (Cone.__proto__ || Object.getPrototypeOf(Cone)).call(this))
 
+    _this3.texSuppo = []
     var numberVertices = nDiv + 2
     var angleStep = 2 * Math.PI / nDiv
     var centre = [0.0, 0.0, 0.0]
@@ -266,23 +276,67 @@ var Cone = (function(_Shape2) {
       _this3.vertices.push(x, y, z)
     }
 
-    // generiamo tutto.
-    for (var _i = 2; _i < numberVertices; _i++) {
-      var angleITex = _i * angleStep / (2 * Math.PI)
+    // genero le texture della parte verticale.
 
-      if (_i < numberVertices - 1) {
+    for (var _i = 0; _i < numberVertices; _i++) {
+      var u = _i * angleStep / (2 * Math.PI)
+      var v = 0.0
+      _this3.texSuppo.push(u, v)
+    }
+
+    for (var _i2 = 0; _i2 < numberVertices; _i2++) {
+      var _u = _i2 * angleStep / (2 * Math.PI)
+      var _v = 1.0
+      _this3.texSuppo.push(_u, _v)
+    }
+
+    for (var _i3 = 0; _i3 < numberVertices; _i3++) {
+      var _u2 = 0.0
+      var _v2 = 0.0
+      _this3.texSuppo.push(_u2, _v2)
+    }
+
+    // generiamo tutto.
+    for (var _i4 = 2; _i4 < numberVertices; _i4++) {
+      if (_i4 < numberVertices - 1) {
         // Collego il vertice al suo precedente e al top.
-        _this3.updateNormal(_i + 1, _i, 1)
-        _this3.texCoord.push(angleITex * angleStep, 0.0, angleITex, 0.0, angleITex, 1.0)
+        _this3.updateNormal(_i4 + 1, _i4, 1)
+
+        var triangle0 = [_i4 + 1, _i4, nDiv + _i4]
+        triangle0.map(function(el) {
+          var _this3$texCoord
+
+          ;(_this3$texCoord = _this3.texCoord).push.apply(_this3$texCoord, _toConsumableArray(_this3.getTexCoord(el)))
+        })
+
         // Collego il vertice al suo successivo e al centro basso.
-        _this3.updateNormal(_i, _i + 1, 0)
-        _this3.texCoord.push(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+        var triangle1 = [numberVertices + _i4, numberVertices + _i4 + 1, numberVertices + 0]
+        _this3.updateNormal.apply(_this3, triangle1)
+
+        triangle1.map(function(el) {
+          var _this3$texCoord2
+
+          ;(_this3$texCoord2 = _this3.texCoord).push.apply(_this3$texCoord2, _toConsumableArray(_this3.getTexCoord(el)))
+        })
       } else {
         // Nel caso sia l'ultimo vertice allora lo collego col primo sulla circonferenza.
-        _this3.updateNormal(2, _i, 1)
-        _this3.texCoord.push(angleStep / (2 * Math.PI), 0.0, angleITex, 0.0, angleITex, 1.0)
-        _this3.updateNormal(_i, 2, 0)
-        _this3.texCoord.push(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+        var _triangle = [2, _i4, 1]
+        var _triangle2 = [_i4, 2, 0]
+
+        _this3.updateNormal.apply(_this3, _triangle)
+        _this3.updateNormal.apply(_this3, _triangle2)
+
+        _triangle.map(function(el) {
+          var _this3$texCoord3
+
+          ;(_this3$texCoord3 = _this3.texCoord).push.apply(_this3$texCoord3, _toConsumableArray(_this3.getTexCoord(el)))
+        })
+
+        _triangle2.map(function(el) {
+          var _this3$texCoord4
+
+          ;(_this3$texCoord4 = _this3.texCoord).push.apply(_this3$texCoord4, _toConsumableArray(_this3.getTexCoord(el)))
+        })
       }
     }
     _this3.cameraPos = new Vector3([0.0, 0.0, 8.0])
@@ -331,22 +385,22 @@ var Cylinder = (function(_Shape3) {
       var _x = Math.cos(_angle) * radius
       var _z = Math.sin(_angle) * radius
 
-      var _u = -_angle / (2 * Math.PI)
-      var _v = 1.0
+      var _u3 = -_angle / (2 * Math.PI)
+      var _v3 = 1.0
 
       _this4.vertices.push(_x, centreTop[1], _z) // i ed è il vertice in basso
-      _this4.texCoord.push(_u, _v)
+      _this4.texCoord.push(_u3, _v3)
     }
 
     // Itero da 0 a nDiv - 1 per inserire gli indici nel buffer.
     for (var k = 0; k < nDiv; k++) {
-      var _i2 = k + 2 // Indice che scorre i vertici della circonferenza inferiore.
-      var _j = _i2 + nDiv // Indice che scorre i vertici della circonferenza superiore.
+      var _i5 = k + 2 // Indice che scorre i vertici della circonferenza inferiore.
+      var _j = _i5 + nDiv // Indice che scorre i vertici della circonferenza superiore.
 
       // Se non stiamo considerando gli ultimi vertici sulle circonferenze.
       if (k < nDiv - 1) {
         // Disegnamo le due circonferenze come al solito.
-        _this4.indices.push(_i2, _i2 + 1, 0)
+        _this4.indices.push(_i5, _i5 + 1, 0)
         _this4.indices.push(_j, _j + 1, 1)
 
         // Disegniamo la maglia costruendo quadrati formati da due triangoli.
@@ -359,16 +413,16 @@ var Cylinder = (function(_Shape3) {
          i       i+1
         */
 
-        _this4.indices.push(_i2, _i2 + 1, _j)
-        _this4.indices.push(_j, _j + 1, _i2 + 1)
+        _this4.indices.push(_i5, _i5 + 1, _j)
+        _this4.indices.push(_j, _j + 1, _i5 + 1)
       } else {
         // Come al solito gli ultimi vertici sulle circonferenze vanno uniti coi primi.
         // Il primo vertice della circonferenza inferiore è 2.
         // Il primo vertice della circonferenza superiore è nDiv + 2.
-        _this4.indices.push(_i2, 2, 0)
+        _this4.indices.push(_i5, 2, 0)
         _this4.indices.push(_j, nDiv + 2, 1)
 
-        _this4.indices.push(_i2, 2, _j)
+        _this4.indices.push(_i5, 2, _j)
         _this4.indices.push(_j, nDiv + 2, 2)
       }
     }
@@ -426,9 +480,9 @@ var Sphere = (function(_Shape4) {
 
     // Inizializzazione degli indici, il significato dei cicli for è sempre lo stesso.
     for (var _j2 = 0; _j2 < nDiv; _j2++) {
-      for (var _i3 = 0; _i3 < nDiv; _i3++) {
+      for (var _i6 = 0; _i6 < nDiv; _i6++) {
         // p1 è un punto su di una circonferenza.
-        var p1 = _j2 * (nDiv + 1) + _i3
+        var p1 = _j2 * (nDiv + 1) + _i6
         // p2 è il punto sulla circonferenza superiore a quella di p1, nella stessa posizione di p1.
         var p2 = p1 + (nDiv + 1)
 
@@ -499,8 +553,8 @@ var Torus = (function(_Shape5) {
     }
 
     for (var _j3 = 0; _j3 < nDiv; _j3++) {
-      for (var _i4 = 0; _i4 < nDiv; _i4++) {
-        var p1 = _j3 * (nDiv + 1) + _i4
+      for (var _i7 = 0; _i7 < nDiv; _i7++) {
+        var p1 = _j3 * (nDiv + 1) + _i7
         var p2 = p1 + (nDiv + 1)
 
         var triangle0 = [p1 + 1, p1, p2]

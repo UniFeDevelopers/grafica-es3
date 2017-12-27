@@ -181,9 +181,13 @@ class Cube extends Shape {
 }
 
 class Cone extends Shape {
+  getTexCoord(idx) {
+    return [this.texSuppo[2 * idx], this.texSuppo[2 * idx + 1]]
+  }
   constructor(nDiv, radius, height) {
     super()
 
+    this.texSuppo = []
     const numberVertices = nDiv + 2
     const angleStep = 2 * Math.PI / nDiv
     const centre = [0.0, 0.0, 0.0]
@@ -202,23 +206,59 @@ class Cone extends Shape {
       this.vertices.push(x, y, z)
     }
 
+    // genero le texture della parte verticale.
+
+    for (let i = 0; i < numberVertices; i++) {
+      let u = i * angleStep / (2 * Math.PI)
+      let v = 0.0
+      this.texSuppo.push(u, v)
+    }
+
+    for (let i = 0; i < numberVertices; i++) {
+      let u = i * angleStep / (2 * Math.PI)
+      let v = 1.0
+      this.texSuppo.push(u, v)
+    }
+
+    for (let i = 0; i < numberVertices; i++) {
+      let u = 0.0
+      let v = 0.0
+      this.texSuppo.push(u, v)
+    }
+
     // generiamo tutto.
     for (let i = 2; i < numberVertices; i++) {
-      let angleITex = i * angleStep / (2 * Math.PI)
-
       if (i < numberVertices - 1) {
         // Collego il vertice al suo precedente e al top.
         this.updateNormal(i + 1, i, 1)
-        this.texCoord.push(angleITex * angleStep, 0.0, angleITex, 0.0, angleITex, 1.0)
+
+        let triangle0 = [i + 1, i, nDiv + i]
+        triangle0.map(el => {
+          this.texCoord.push(...this.getTexCoord(el))
+        })
+
         // Collego il vertice al suo successivo e al centro basso.
-        this.updateNormal(i, i + 1, 0)
-        this.texCoord.push(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+        let triangle1 = [numberVertices + i, numberVertices + i + 1, numberVertices + 0]
+        this.updateNormal(...triangle1)
+
+        triangle1.map(el => {
+          this.texCoord.push(...this.getTexCoord(el))
+        })
       } else {
         // Nel caso sia l'ultimo vertice allora lo collego col primo sulla circonferenza.
-        this.updateNormal(2, i, 1)
-        this.texCoord.push(angleStep / (2 * Math.PI), 0.0, angleITex, 0.0, angleITex, 1.0)
-        this.updateNormal(i, 2, 0)
-        this.texCoord.push(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+        let triangle0 = [2, i, 1]
+        let triangle1 = [i, 2, 0]
+
+        this.updateNormal(...triangle0)
+        this.updateNormal(...triangle1)
+
+        triangle0.map(el => {
+          this.texCoord.push(...this.getTexCoord(el))
+        })
+
+        triangle1.map(el => {
+          this.texCoord.push(...this.getTexCoord(el))
+        })
       }
     }
     this.cameraPos = new Vector3([0.0, 0.0, 8.0])
