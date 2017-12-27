@@ -1,15 +1,21 @@
 'use strict'
 
-function _toConsumableArray(arr) {
-  if (Array.isArray(arr)) {
-    for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) {
-      arr2[i] = arr[i]
+var _createClass = (function() {
+  function defineProperties(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i]
+      descriptor.enumerable = descriptor.enumerable || false
+      descriptor.configurable = true
+      if ('value' in descriptor) descriptor.writable = true
+      Object.defineProperty(target, descriptor.key, descriptor)
     }
-    return arr2
-  } else {
-    return Array.from(arr)
   }
-}
+  return function(Constructor, protoProps, staticProps) {
+    if (protoProps) defineProperties(Constructor.prototype, protoProps)
+    if (staticProps) defineProperties(Constructor, staticProps)
+    return Constructor
+  }
+})()
 
 function _possibleConstructorReturn(self, call) {
   if (!self) {
@@ -27,6 +33,17 @@ function _inherits(subClass, superClass) {
   })
   if (superClass)
     Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : (subClass.__proto__ = superClass)
+}
+
+function _toConsumableArray(arr) {
+  if (Array.isArray(arr)) {
+    for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) {
+      arr2[i] = arr[i]
+    }
+    return arr2
+  } else {
+    return Array.from(arr)
+  }
 }
 
 function _classCallCheck(instance, Constructor) {
@@ -52,14 +69,85 @@ var vertexShaderSource =
 var fragmentShaderSource =
   '\n  #ifdef GL_ES\n  precision mediump float;\n  #endif\n\n  uniform sampler2D u_Sampler;\n  varying vec2 v_TexCoord;\n\n  void main() {\n    gl_FragColor = texture2D(u_Sampler, v_TexCoord);\n  }\n'
 
-var Shape = function Shape() {
-  _classCallCheck(this, Shape)
+var cross = function cross(edge1, edge2) {
+  var n = []
 
-  this.vertices = []
-  this.texCoord = []
-  this.indices = []
-  this.cameraPos = new Vector3([0.0, 0.0, 6.0])
+  /* 
+   * Nx = UyVz - UzVy
+   * Ny = UzVx - UxVz
+   * Nz = UxVy - UyVx
+   */
+
+  n[0] = edge1[1] * edge2[2] - edge1[2] * edge2[1]
+  n[1] = edge1[2] * edge2[0] - edge1[0] * edge2[2]
+  n[2] = edge1[0] * edge2[1] - edge1[1] * edge2[0]
+
+  return n
 }
+
+var getNormal = function getNormal(v1, v2, v3) {
+  var edge1 = []
+  edge1[0] = v2[0] - v1[0]
+  edge1[1] = v2[1] - v1[1]
+  edge1[2] = v2[2] - v1[2]
+
+  var edge2 = []
+  edge2[0] = v3[0] - v1[0]
+  edge2[1] = v3[1] - v1[1]
+  edge2[2] = v3[2] - v1[2]
+
+  return cross(edge1, edge2)
+}
+
+var Shape = (function() {
+  function Shape() {
+    _classCallCheck(this, Shape)
+
+    this.vertices = []
+    this.verticesToDraw = []
+    this.normals = []
+    this.texCoord = []
+    // this.indices = []
+    this.cameraPos = new Vector3([0.0, 0.0, 6.0])
+  }
+
+  _createClass(Shape, [
+    {
+      key: 'getVertex',
+      value: function getVertex(idx) {
+        return [this.vertices[3 * idx], this.vertices[3 * idx + 1], this.vertices[3 * idx + 2]]
+      },
+    },
+    {
+      key: 'updateNormal',
+      value: function updateNormal(idx1, idx2, idx3) {
+        var _this = this,
+          _normals
+
+        // passati 3 indici di vertici appartenenti ad un triangolo
+        var triangle = [this.getVertex(idx1), this.getVertex(idx2), this.getVertex(idx3)]
+
+        // si caricano i tre vertici nel buffer dei vertici da disegnare
+        triangle.map(function(v) {
+          var _verticesToDraw
+
+          ;(_verticesToDraw = _this.verticesToDraw).push.apply(_verticesToDraw, _toConsumableArray(v))
+        })
+
+        // per poi calcolare la normale del triangolo
+        var norm = getNormal.apply(undefined, triangle)
+
+        // e si carica la normale per ogni vertice di tale triangolo
+        ;(_normals = this.normals).push.apply(
+          _normals,
+          _toConsumableArray(norm).concat(_toConsumableArray(norm), _toConsumableArray(norm))
+        )
+      },
+    },
+  ])
+
+  return Shape
+})()
 
 var Cube = (function(_Shape) {
   _inherits(Cube, _Shape)
@@ -77,104 +165,74 @@ var Cube = (function(_Shape) {
     //  v2------v3
     // Coordinates
 
-    // prettier-ignore
-    var _this = _possibleConstructorReturn(this, (Cube.__proto__ || Object.getPrototypeOf(Cube)).call(this));
+    var _this2 = _possibleConstructorReturn(this, (Cube.__proto__ || Object.getPrototypeOf(Cube)).call(this))
 
-    _this.vertices = [
-      1.0,
-      1.0,
-      1.0,
-      -1.0,
-      1.0,
-      1.0,
-      -1.0,
-      -1.0,
-      1.0,
-      1.0,
-      -1.0,
-      1.0, // v0-v1-v2-v3 front
-      1.0,
-      1.0,
-      1.0,
-      1.0,
-      -1.0,
-      1.0,
-      1.0,
-      -1.0,
-      -1.0,
-      1.0,
-      1.0,
-      -1.0, // v0-v3-v4-v5 right
-      1.0,
-      1.0,
-      1.0,
-      1.0,
-      1.0,
-      -1.0,
-      -1.0,
-      1.0,
-      -1.0,
-      -1.0,
-      1.0,
-      1.0, // v0-v5-v6-v1 up
-      -1.0,
-      1.0,
-      1.0,
-      -1.0,
-      1.0,
-      -1.0,
-      -1.0,
-      -1.0,
-      -1.0,
-      -1.0,
-      -1.0,
-      1.0, // v1-v6-v7-v2 left
-      -1.0,
-      -1.0,
-      -1.0,
-      1.0,
-      -1.0,
-      -1.0,
-      1.0,
-      -1.0,
-      1.0,
-      -1.0,
-      -1.0,
-      1.0, // v7-v4-v3-v2 down
-      1.0,
-      -1.0,
-      -1.0,
-      -1.0,
-      -1.0,
-      -1.0,
-      -1.0,
-      1.0,
-      -1.0,
-      1.0,
-      1.0,
-      -1.0, // v4-v7-v6-v5 back
+    _this2.numberVertices = 8
+    // prettier-ignore
+    _this2.vertices = [1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, // v0-v1-v2-v3 front
+    1.0, -1.0, -1.0, 1.0, 1.0, -1.0, // v0-v3-v4-v5 right
+    -1.0, 1.0, -1.0, // v0-v5-v6-v1 up
+    -1.0, -1.0, -1.0];
+
+    // Normal
+    // prettier-ignore
+    /*
+    this.normals = [
+      0.0, 0.0, 1.0,   0.0, 0.0, 1.0,   0.0, 0.0, 1.0,   0.0, 0.0, 1.0,  // v0-v1-v2-v3 front
+      1.0, 0.0, 0.0,   1.0, 0.0, 0.0,   1.0, 0.0, 0.0,   1.0, 0.0, 0.0,  // v0-v3-v4-v5 right
+      0.0, 1.0, 0.0,   0.0, 1.0, 0.0,   0.0, 1.0, 0.0,   0.0, 1.0, 0.0,  // v0-v5-v6-v1 up
+      -1.0, 0.0, 0.0,  -1.0, 0.0, 0.0,  -1.0, 0.0, 0.0,  -1.0, 0.0, 0.0,  // v1-v6-v7-v2 left
+      0.0,-1.0, 0.0,   0.0,-1.0, 0.0,   0.0,-1.0, 0.0,   0.0,-1.0, 0.0,  // v7-v4-v3-v2 down
+      0.0, 0.0,-1.0,   0.0, 0.0,-1.0,   0.0, 0.0,-1.0,   0.0, 0.0,-1.0   // v4-v7-v6-v5 back
+    ];
+    */
+
+    // prettier-ignore
+    /*
+    this.texCoord = [
+      1.0, 1.0,   0.0, 1.0,   0.0, 0.0,   1.0, 0.0,  // v0-v1-v2-v3 front
+      0.0, 1.0,   0.0, 0.0,   1.0, 0.0,   1.0, 1.0,  // v0-v3-v4-v5 right
+      1.0, 0.0,   1.0, 1.0,   0.0, 1.0,   0.0, 0.0,  // v0-v5-v6-v1 up
+      1.0, 1.0,   0.0, 1.0,   0.0, 0.0,   1.0, 0.0,  // v1-v6-v7-v2 left
+      0.0, 0.0,   1.0, 0.0,   1.0, 1.0,   0.0, 1.0,  // v7-v4-v3-v2 down
+      0.0, 0.0,   1.0, 0.0,   1.0, 1.0,   0.0, 1.0   // v4-v7-v6-v5 back
     ]
+    */
 
-    // prettier-ignore
-    _this.texCoord = [1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, // v0-v1-v2-v3 front
-    0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0, // v0-v3-v4-v5 right
-    1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, // v0-v5-v6-v1 up
-    1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, // v1-v6-v7-v2 left
-    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, // v7-v4-v3-v2 down
-    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0 // v4-v7-v6-v5 back
-    ];
+    _this2.updateNormal(0, 1, 2);
+    _this2.texCoord.push(1.0, 1.0, 0.0, 1.0, 0.0, 0.0)
+    _this2.updateNormal(2, 3, 0)
+    _this2.texCoord.push(0.0, 0.0, 1.0, 0.0, 1.0, 1.0)
 
-    // prettier-ignore
-    _this.indices = [0, 1, 2, 0, 2, 3, // front
-    4, 5, 6, 4, 6, 7, // right
-    8, 9, 10, 8, 10, 11, // up
-    12, 13, 14, 12, 14, 15, // left
-    16, 17, 18, 16, 18, 19, // down
-    20, 21, 22, 20, 22, 23 // back
-    ];
+    _this2.updateNormal(0, 3, 4)
+    _this2.texCoord.push(0.0, 1.0, 0.0, 0.0, 1.0, 0.0)
+    _this2.updateNormal(4, 5, 0)
+    _this2.texCoord.push(1.0, 0.0, 1.0, 1.0, 0.0, 1.0)
 
-    _this.cameraPos = new Vector3([0.0, 0.0, 7.0])
-    return _this
+    _this2.updateNormal(0, 5, 6)
+    _this2.texCoord.push(1.0, 0.0, 1.0, 1.0, 0.0, 1.0)
+    _this2.updateNormal(6, 1, 0)
+    _this2.texCoord.push(0.0, 1.0, 0.0, 0.0, 1.0, 0.0)
+
+    _this2.updateNormal(1, 6, 7)
+    _this2.texCoord.push(1.0, 1.0, 0.0, 1.0, 0.0, 0.0)
+    _this2.updateNormal(7, 2, 1)
+    _this2.texCoord.push(0.0, 0.0, 1.0, 0.0, 1.0, 1.0)
+
+    _this2.updateNormal(7, 4, 3)
+    _this2.texCoord.push(0.0, 0.0, 1.0, 0.0, 1.0, 1.0)
+    _this2.updateNormal(3, 2, 7)
+    _this2.texCoord.push(1.0, 1.0, 0.0, 1.0, 0.0, 0.0)
+
+    _this2.updateNormal(4, 7, 6)
+    //this.texCoord.push(0.0, 0.0, 1.0, 0.0, 1.0, 1.0)
+    _this2.texCoord.push(1.0, 1.0, 0.0, 1.0, 0.0, 0.0)
+    _this2.updateNormal(6, 5, 4)
+    //this.texCoord.push(1.0, 1.0, 0.0, 1.0, 0.0, 0.0)
+    _this2.texCoord.push(0.0, 0.0, 1.0, 0.0, 1.0, 1.0)
+
+    _this2.cameraPos = new Vector3([0.0, 0.0, 7.0])
+    return _this2
   }
 
   return Cube
@@ -184,24 +242,24 @@ var Cone = (function(_Shape2) {
   _inherits(Cone, _Shape2)
 
   function Cone(nDiv, radius, height) {
-    var _this2$vertices, _this2$vertices2
+    var _this3$vertices, _this3$vertices2
 
     _classCallCheck(this, Cone)
 
-    var _this2 = _possibleConstructorReturn(this, (Cone.__proto__ || Object.getPrototypeOf(Cone)).call(this))
+    var _this3 = _possibleConstructorReturn(this, (Cone.__proto__ || Object.getPrototypeOf(Cone)).call(this))
 
     var numberVertices = nDiv + 2
     var angleStep = 2 * Math.PI / nDiv
     var centre = [0.0, 0.0, 0.0]
     var top = [0.0, height, 0.0]
 
-    ;(_this2$vertices = _this2.vertices).push.apply(_this2$vertices, centre)
+    ;(_this3$vertices = _this3.vertices).push.apply(_this3$vertices, centre)
     // TODO: Ci penso dopo.
-    _this2.texCoord.push(0.5, 0.0)
+    _this3.texCoord.push(0.5, 0.0)
 
-    ;(_this2$vertices2 = _this2.vertices).push.apply(_this2$vertices2, top)
+    ;(_this3$vertices2 = _this3.vertices).push.apply(_this3$vertices2, top)
     // Il top sarà al centro sull'asse u, e al punto più alto nell'asse v.
-    _this2.texCoord.push(0.5, 1.0)
+    _this3.texCoord.push(0.5, 1.0)
 
     // genero tutti i vertici
     for (var i = 2, angle = 0; i < numberVertices; i++, angle += angleStep) {
@@ -209,26 +267,26 @@ var Cone = (function(_Shape2) {
       var z = Math.sin(angle) * radius
       var y = centre[1]
 
-      _this2.vertices.push(x, y, z)
+      _this3.vertices.push(x, y, z)
 
       var u = angle / (2 * Math.PI)
       var v = 0.0
-      _this2.texCoord.push(u, v)
+      _this3.texCoord.push(u, v)
 
       if (i < numberVertices - 1) {
         // Collego il vertice al suo precedente e al top.
-        _this2.indices.push(0, i, i + 1)
+        _this3.indices.push(0, i, i + 1)
         // Collego il vertice al suo precedente e al centro basso.
-        _this2.indices.push(1, i, i + 1)
+        _this3.indices.push(1, i, i + 1)
       } else {
         // Nel caso sia l'ultimo vertice allora lo collego col primo sulla circonferenza.
-        _this2.indices.push(0, i, 2)
-        _this2.indices.push(1, i, 2)
+        _this3.indices.push(0, i, 2)
+        _this3.indices.push(1, i, 2)
       }
     }
 
-    _this2.cameraPos = new Vector3([0.0, 0.0, 8.0])
-    return _this2
+    _this3.cameraPos = new Vector3([0.0, 0.0, 8.0])
+    return _this3
   }
 
   return Cone
@@ -238,11 +296,11 @@ var Cylinder = (function(_Shape3) {
   _inherits(Cylinder, _Shape3)
 
   function Cylinder(nDiv, radius, height) {
-    var _this3$vertices, _this3$vertices2
+    var _this4$vertices, _this4$vertices2
 
     _classCallCheck(this, Cylinder)
 
-    var _this3 = _possibleConstructorReturn(this, (Cylinder.__proto__ || Object.getPrototypeOf(Cylinder)).call(this))
+    var _this4 = _possibleConstructorReturn(this, (Cylinder.__proto__ || Object.getPrototypeOf(Cylinder)).call(this))
 
     var angleStep = 2 * Math.PI / nDiv
 
@@ -250,11 +308,11 @@ var Cylinder = (function(_Shape3) {
     var centreBottom = [0.0, 0.0, 0.0]
     var centreTop = [0.0, height, 0.0]
 
-    ;(_this3$vertices = _this3.vertices).push.apply(_this3$vertices, centreBottom) // Indice 0
-    _this3.texCoord.push(0.5, 0.0)
+    ;(_this4$vertices = _this4.vertices).push.apply(_this4$vertices, centreBottom) // Indice 0
+    _this4.texCoord.push(0.5, 0.0)
 
-    ;(_this3$vertices2 = _this3.vertices).push.apply(_this3$vertices2, centreTop) // Indice 1
-    _this3.texCoord.push(0.5, 1.0)
+    ;(_this4$vertices2 = _this4.vertices).push.apply(_this4$vertices2, centreTop) // Indice 1
+    _this4.texCoord.push(0.5, 1.0)
 
     // Carico dalla posizione 2 ad nDiv + 1 i vertici della circonferenza inferiore.
     for (var i = 0, angle = 0; i < nDiv; i++, angle += angleStep) {
@@ -264,8 +322,8 @@ var Cylinder = (function(_Shape3) {
       var u = -angle / (2 * Math.PI)
       var v = 0.0
 
-      _this3.vertices.push(x, centreBottom[1], z) // i ed è il vertice in basso
-      _this3.texCoord.push(u, v)
+      _this4.vertices.push(x, centreBottom[1], z) // i ed è il vertice in basso
+      _this4.texCoord.push(u, v)
     }
 
     // Carico dalla posizione nDiv + 2 ad 2*nDiv + 1 i vertici della circonferenza superiore
@@ -276,8 +334,8 @@ var Cylinder = (function(_Shape3) {
       var _u = -_angle / (2 * Math.PI)
       var _v = 1.0
 
-      _this3.vertices.push(_x, centreTop[1], _z) // i ed è il vertice in basso
-      _this3.texCoord.push(_u, _v)
+      _this4.vertices.push(_x, centreTop[1], _z) // i ed è il vertice in basso
+      _this4.texCoord.push(_u, _v)
     }
 
     // Itero da 0 a nDiv - 1 per inserire gli indici nel buffer.
@@ -288,8 +346,8 @@ var Cylinder = (function(_Shape3) {
       // Se non stiamo considerando gli ultimi vertici sulle circonferenze.
       if (k < nDiv - 1) {
         // Disegnamo le due circonferenze come al solito.
-        _this3.indices.push(_i, _i + 1, 0)
-        _this3.indices.push(_j, _j + 1, 1)
+        _this4.indices.push(_i, _i + 1, 0)
+        _this4.indices.push(_j, _j + 1, 1)
 
         // Disegniamo la maglia costruendo quadrati formati da due triangoli.
         /*
@@ -301,22 +359,22 @@ var Cylinder = (function(_Shape3) {
          i       i+1
         */
 
-        _this3.indices.push(_i, _i + 1, _j)
-        _this3.indices.push(_j, _j + 1, _i + 1)
+        _this4.indices.push(_i, _i + 1, _j)
+        _this4.indices.push(_j, _j + 1, _i + 1)
       } else {
         // Come al solito gli ultimi vertici sulle circonferenze vanno uniti coi primi.
         // Il primo vertice della circonferenza inferiore è 2.
         // Il primo vertice della circonferenza superiore è nDiv + 2.
-        _this3.indices.push(_i, 2, 0)
-        _this3.indices.push(_j, nDiv + 2, 1)
+        _this4.indices.push(_i, 2, 0)
+        _this4.indices.push(_j, nDiv + 2, 1)
 
-        _this3.indices.push(_i, 2, _j)
-        _this3.indices.push(_j, nDiv + 2, 2)
+        _this4.indices.push(_i, 2, _j)
+        _this4.indices.push(_j, nDiv + 2, 2)
       }
     }
 
-    _this3.cameraPos = new Vector3([0.0, 0.0, 10.0])
-    return _this3
+    _this4.cameraPos = new Vector3([0.0, 0.0, 10.0])
+    return _this4
   }
 
   return Cylinder
@@ -331,7 +389,7 @@ var Sphere = (function(_Shape4) {
     // Per disegnare una sfera abbiamo bisogno di nDiv^2 vertici.
     // Il ciclo for più esterno è quello che itera sull'angolo phi, ossia quello che ci fa passare da
     // una circonferenza alla sua consecutiva.
-    var _this4 = _possibleConstructorReturn(this, (Sphere.__proto__ || Object.getPrototypeOf(Sphere)).call(this))
+    var _this5 = _possibleConstructorReturn(this, (Sphere.__proto__ || Object.getPrototypeOf(Sphere)).call(this))
 
     for (var j = 0; j <= nDiv; j++) {
       // L'angolo phi è compresto tra 0 e Pi
@@ -348,12 +406,12 @@ var Sphere = (function(_Shape4) {
         var y = Math.cos(phi)
         var z = Math.cos(theta) * Math.sin(phi)
 
-        _this4.vertices.push(radius * x, radius * y, radius * z)
+        _this5.vertices.push(radius * x, radius * y, radius * z)
 
         var u = theta / (2 * Math.PI)
         var v = 1 - phi / Math.PI
 
-        _this4.texCoord.push(u, v)
+        _this5.texCoord.push(u, v)
       }
     }
 
@@ -366,11 +424,11 @@ var Sphere = (function(_Shape4) {
         var p2 = p1 + (nDiv + 1)
 
         // I punti vanno uniti come nel cilindro per formare dei quadrati.
-        _this4.indices.push(p1, p2, p1 + 1)
-        _this4.indices.push(p1 + 1, p2, p2 + 1)
+        _this5.indices.push(p1, p2, p1 + 1)
+        _this5.indices.push(p1 + 1, p2, p2 + 1)
       }
     }
-    return _this4
+    return _this5
   }
 
   return Sphere
@@ -387,7 +445,7 @@ var Torus = (function(_Shape5) {
     // e chiaramente le coordinate dei vertici in funzione della
     // formula parametrica del toro
 
-    var _this5 = _possibleConstructorReturn(this, (Torus.__proto__ || Object.getPrototypeOf(Torus)).call(this))
+    var _this6 = _possibleConstructorReturn(this, (Torus.__proto__ || Object.getPrototypeOf(Torus)).call(this))
 
     for (var j = 0; j <= nDiv; j++) {
       var phi = j * 2 * Math.PI / nDiv
@@ -402,8 +460,8 @@ var Torus = (function(_Shape5) {
         var u = phi / (2 * Math.PI)
         var v = theta / (2 * Math.PI)
 
-        _this5.vertices.push(x, y, z)
-        _this5.texCoord.push(u, v)
+        _this6.vertices.push(x, y, z)
+        _this6.texCoord.push(u, v)
       }
     }
 
@@ -412,11 +470,11 @@ var Torus = (function(_Shape5) {
         var p1 = _j3 * (nDiv + 1) + _i3
         var p2 = p1 + (nDiv + 1)
 
-        _this5.indices.push(p1, p2, p1 + 1)
-        _this5.indices.push(p1 + 1, p2, p2 + 1)
+        _this6.indices.push(p1, p2, p1 + 1)
+        _this6.indices.push(p1 + 1, p2, p2 + 1)
       }
     }
-    return _this5
+    return _this6
   }
 
   return Torus
@@ -763,7 +821,7 @@ var main = function main() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
     // Draw the cube
-    gl.drawElements(gl.TRIANGLES, n, gl.UNSIGNED_SHORT, 0)
+    gl.drawArrays(gl.TRIANGLES, 0, n)
 
     requestAnimationFrame(tick, canvas) // Request that the browser calls tick
   }
@@ -771,27 +829,28 @@ var main = function main() {
 }
 
 var initVertexBuffers = function initVertexBuffers(gl, shape) {
-  var vertices = new Float32Array(shape.vertices)
-  var indices = new Uint16Array(shape.indices)
+  var verticesToDraw = new Float32Array(shape.verticesToDraw)
+  //const indices = new Uint16Array(shape.indices)
   var texCoord = new Float32Array(shape.texCoord)
 
   // Write the vertex property to buffers (coordinates, colors and normals)
-  if (!initArrayBuffer(gl, 'a_Position', vertices, gl.FLOAT, 3)) return -1
+  if (!initArrayBuffer(gl, 'a_Position', verticesToDraw, gl.FLOAT, 3)) return -1
   if (!initArrayBuffer(gl, 'a_TexCoord', texCoord, gl.FLOAT, 2)) return -1
 
+  /*
   // Unbind the buffer object
   gl.bindBuffer(gl.ARRAY_BUFFER, null)
-
-  // Write the indices to the buffer object
-  var indexBuffer = gl.createBuffer()
+   // Write the indices to the buffer object
+  let indexBuffer = gl.createBuffer()
   if (!indexBuffer) {
     console.log('Failed to create the buffer object')
     return false
   }
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer)
   gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW)
+  */
 
-  return indices.length
+  return verticesToDraw.length / 3
 }
 
 var initArrayBuffer = function initArrayBuffer(gl, attribute, data, type, num) {
@@ -817,6 +876,8 @@ var initArrayBuffer = function initArrayBuffer(gl, attribute, data, type, num) {
   gl.vertexAttribPointer(a_attribute, num, type, false, 0, 0)
   // Enable the assignment of the buffer object to the attribute variable
   gl.enableVertexAttribArray(a_attribute)
+
+  // TODO: Ci vuole l'unbinding? Ciao Anto.
   return true
 }
 

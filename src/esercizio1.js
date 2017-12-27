@@ -34,12 +34,64 @@ const fragmentShaderSource = `
   }
 `
 
+const cross = (edge1, edge2) => {
+  let n = []
+
+  /* 
+   * Nx = UyVz - UzVy
+   * Ny = UzVx - UxVz
+   * Nz = UxVy - UyVx
+   */
+
+  n[0] = edge1[1] * edge2[2] - edge1[2] * edge2[1]
+  n[1] = edge1[2] * edge2[0] - edge1[0] * edge2[2]
+  n[2] = edge1[0] * edge2[1] - edge1[1] * edge2[0]
+
+  return n
+}
+
+const getNormal = (v1, v2, v3) => {
+  let edge1 = []
+  edge1[0] = v2[0] - v1[0]
+  edge1[1] = v2[1] - v1[1]
+  edge1[2] = v2[2] - v1[2]
+
+  let edge2 = []
+  edge2[0] = v3[0] - v1[0]
+  edge2[1] = v3[1] - v1[1]
+  edge2[2] = v3[2] - v1[2]
+
+  return cross(edge1, edge2)
+}
+
 class Shape {
   constructor() {
     this.vertices = []
+    this.verticesToDraw = []
+    this.normals = []
     this.texCoord = []
-    this.indices = []
+    // this.indices = []
     this.cameraPos = new Vector3([0.0, 0.0, 6.0])
+  }
+
+  getVertex(idx) {
+    return [this.vertices[3 * idx], this.vertices[3 * idx + 1], this.vertices[3 * idx + 2]]
+  }
+
+  updateNormal(idx1, idx2, idx3) {
+    // passati 3 indici di vertici appartenenti ad un triangolo
+    let triangle = [this.getVertex(idx1), this.getVertex(idx2), this.getVertex(idx3)]
+
+    // si caricano i tre vertici nel buffer dei vertici da disegnare
+    triangle.map(v => {
+      this.verticesToDraw.push(...v)
+    })
+
+    // per poi calcolare la normale del triangolo
+    let norm = getNormal(...triangle)
+
+    // e si carica la normale per ogni vertice di tale triangolo
+    this.normals.push(...norm, ...norm, ...norm)
   }
 }
 
@@ -56,17 +108,32 @@ class Cube extends Shape {
     //  v2------v3
     // Coordinates
 
+    this.numberVertices = 8
     // prettier-ignore
     this.vertices = [
       1.0, 1.0, 1.0,   -1.0, 1.0, 1.0,  -1.0,-1.0, 1.0,  1.0,-1.0, 1.0,  // v0-v1-v2-v3 front
-      1.0, 1.0, 1.0,   1.0,-1.0, 1.0,   1.0,-1.0,-1.0,   1.0, 1.0,-1.0,  // v0-v3-v4-v5 right
-      1.0, 1.0, 1.0,   1.0, 1.0,-1.0,   -1.0, 1.0,-1.0,  -1.0, 1.0, 1.0, // v0-v5-v6-v1 up
-      -1.0, 1.0, 1.0,  -1.0, 1.0,-1.0,  -1.0,-1.0,-1.0,  -1.0,-1.0, 1.0, // v1-v6-v7-v2 left
-      -1.0,-1.0,-1.0,  1.0,-1.0,-1.0,   1.0,-1.0, 1.0,   -1.0,-1.0, 1.0, // v7-v4-v3-v2 down
-      1.0,-1.0,-1.0,   -1.0,-1.0,-1.0,  -1.0, 1.0,-1.0,  1.0, 1.0,-1.0   // v4-v7-v6-v5 back
+     1.0,-1.0,-1.0,   1.0, 1.0,-1.0,  // v0-v3-v4-v5 right
+     -1.0, 1.0,-1.0,  // v0-v5-v6-v1 up
+     -1.0,-1.0,-1.0,   // v1-v6-v7-v2 left
+       // v7-v4-v3-v2 down
+        // v4-v7-v6-v5 back
     ]
 
+    // Normal
     // prettier-ignore
+    /*
+    this.normals = [
+      0.0, 0.0, 1.0,   0.0, 0.0, 1.0,   0.0, 0.0, 1.0,   0.0, 0.0, 1.0,  // v0-v1-v2-v3 front
+      1.0, 0.0, 0.0,   1.0, 0.0, 0.0,   1.0, 0.0, 0.0,   1.0, 0.0, 0.0,  // v0-v3-v4-v5 right
+      0.0, 1.0, 0.0,   0.0, 1.0, 0.0,   0.0, 1.0, 0.0,   0.0, 1.0, 0.0,  // v0-v5-v6-v1 up
+      -1.0, 0.0, 0.0,  -1.0, 0.0, 0.0,  -1.0, 0.0, 0.0,  -1.0, 0.0, 0.0,  // v1-v6-v7-v2 left
+      0.0,-1.0, 0.0,   0.0,-1.0, 0.0,   0.0,-1.0, 0.0,   0.0,-1.0, 0.0,  // v7-v4-v3-v2 down
+      0.0, 0.0,-1.0,   0.0, 0.0,-1.0,   0.0, 0.0,-1.0,   0.0, 0.0,-1.0   // v4-v7-v6-v5 back
+    ];
+    */
+
+    // prettier-ignore
+    /*
     this.texCoord = [
       1.0, 1.0,   0.0, 1.0,   0.0, 0.0,   1.0, 0.0,  // v0-v1-v2-v3 front
       0.0, 1.0,   0.0, 0.0,   1.0, 0.0,   1.0, 1.0,  // v0-v3-v4-v5 right
@@ -75,16 +142,39 @@ class Cube extends Shape {
       0.0, 0.0,   1.0, 0.0,   1.0, 1.0,   0.0, 1.0,  // v7-v4-v3-v2 down
       0.0, 0.0,   1.0, 0.0,   1.0, 1.0,   0.0, 1.0   // v4-v7-v6-v5 back
     ]
+    */
 
-    // prettier-ignore
-    this.indices = [
-      0,  1,  2,   0, 2,  3,     // front
-      4,  5,  6,   4, 6,  7,     // right
-      8,  9,  10,  8, 10, 11,    // up
-      12, 13, 14, 12, 14, 15,    // left
-      16, 17, 18, 16, 18, 19,    // down
-      20, 21, 22, 20, 22, 23     // back
-    ]
+    this.updateNormal(0,1,2)
+    this.texCoord.push(1.0, 1.0, 0.0, 1.0, 0.0, 0.0)
+    this.updateNormal(2, 3, 0)
+    this.texCoord.push(0.0, 0.0, 1.0, 0.0, 1.0, 1.0)
+
+    this.updateNormal(0, 3, 4)
+    this.texCoord.push(0.0, 1.0, 0.0, 0.0, 1.0, 0.0)
+    this.updateNormal(4, 5, 0)
+    this.texCoord.push(1.0, 0.0, 1.0, 1.0, 0.0, 1.0)
+
+    this.updateNormal(0, 5, 6)
+    this.texCoord.push(1.0, 0.0, 1.0, 1.0, 0.0, 1.0)
+    this.updateNormal(6, 1, 0)
+    this.texCoord.push(0.0, 1.0, 0.0, 0.0, 1.0, 0.0)
+
+    this.updateNormal(1, 6, 7)
+    this.texCoord.push(1.0, 1.0, 0.0, 1.0, 0.0, 0.0)
+    this.updateNormal(7, 2, 1)
+    this.texCoord.push(0.0, 0.0, 1.0, 0.0, 1.0, 1.0)
+
+    this.updateNormal(7, 4, 3)
+    this.texCoord.push(0.0, 0.0, 1.0, 0.0, 1.0, 1.0)
+    this.updateNormal(3, 2, 7)
+    this.texCoord.push(1.0, 1.0, 0.0, 1.0, 0.0, 0.0)
+
+    this.updateNormal(4, 7, 6)
+    //this.texCoord.push(0.0, 0.0, 1.0, 0.0, 1.0, 1.0)
+    this.texCoord.push(1.0, 1.0, 0.0, 1.0, 0.0, 0.0)
+    this.updateNormal(6, 5, 4)
+    //this.texCoord.push(1.0, 1.0, 0.0, 1.0, 0.0, 0.0)
+    this.texCoord.push(0.0, 0.0, 1.0, 0.0, 1.0, 1.0)
 
     this.cameraPos = new Vector3([0.0, 0.0, 7.0])
   }
@@ -516,7 +606,7 @@ const main = () => {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
     // Draw the cube
-    gl.drawElements(gl.TRIANGLES, n, gl.UNSIGNED_SHORT, 0)
+    gl.drawArrays(gl.TRIANGLES, 0, n)
 
     requestAnimationFrame(tick, canvas) // Request that the browser calls tick
   }
@@ -524,14 +614,15 @@ const main = () => {
 }
 
 const initVertexBuffers = (gl, shape) => {
-  const vertices = new Float32Array(shape.vertices)
-  const indices = new Uint16Array(shape.indices)
+  const verticesToDraw = new Float32Array(shape.verticesToDraw)
+  //const indices = new Uint16Array(shape.indices)
   const texCoord = new Float32Array(shape.texCoord)
 
   // Write the vertex property to buffers (coordinates, colors and normals)
-  if (!initArrayBuffer(gl, 'a_Position', vertices, gl.FLOAT, 3)) return -1
+  if (!initArrayBuffer(gl, 'a_Position', verticesToDraw, gl.FLOAT, 3)) return -1
   if (!initArrayBuffer(gl, 'a_TexCoord', texCoord, gl.FLOAT, 2)) return -1
 
+  /*
   // Unbind the buffer object
   gl.bindBuffer(gl.ARRAY_BUFFER, null)
 
@@ -543,8 +634,9 @@ const initVertexBuffers = (gl, shape) => {
   }
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer)
   gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW)
+  */
 
-  return indices.length
+  return verticesToDraw.length / 3
 }
 
 const initArrayBuffer = (gl, attribute, data, type, num) => {
@@ -570,6 +662,8 @@ const initArrayBuffer = (gl, attribute, data, type, num) => {
   gl.vertexAttribPointer(a_attribute, num, type, false, 0, 0)
   // Enable the assignment of the buffer object to the attribute variable
   gl.enableVertexAttribArray(a_attribute)
+
+  // TODO: Ci vuole l'unbinding? Ciao Anto.
   return true
 }
 
