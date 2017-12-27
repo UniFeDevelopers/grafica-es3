@@ -254,37 +254,37 @@ var Cone = (function(_Shape2) {
     var top = [0.0, height, 0.0]
 
     ;(_this3$vertices = _this3.vertices).push.apply(_this3$vertices, centre)
-    // TODO: Ci penso dopo.
-    _this3.texCoord.push(0.5, 0.0)
-
     ;(_this3$vertices2 = _this3.vertices).push.apply(_this3$vertices2, top)
-    // Il top sarà al centro sull'asse u, e al punto più alto nell'asse v.
-    _this3.texCoord.push(0.5, 1.0)
 
     // genero tutti i vertici
-    for (var i = 2, angle = 0; i < numberVertices; i++, angle += angleStep) {
+    for (var i = 2; i < numberVertices; i++) {
+      var angle = i * angleStep
       var x = Math.cos(angle) * radius
       var z = Math.sin(angle) * radius
       var y = centre[1]
 
       _this3.vertices.push(x, y, z)
-
-      var u = angle / (2 * Math.PI)
-      var v = 0.0
-      _this3.texCoord.push(u, v)
-
-      if (i < numberVertices - 1) {
-        // Collego il vertice al suo precedente e al top.
-        _this3.indices.push(0, i, i + 1)
-        // Collego il vertice al suo precedente e al centro basso.
-        _this3.indices.push(1, i, i + 1)
-      } else {
-        // Nel caso sia l'ultimo vertice allora lo collego col primo sulla circonferenza.
-        _this3.indices.push(0, i, 2)
-        _this3.indices.push(1, i, 2)
-      }
     }
 
+    // generiamo tutto.
+    for (var _i = 2; _i < numberVertices; _i++) {
+      var angleITex = _i * angleStep / (2 * Math.PI)
+
+      if (_i < numberVertices - 1) {
+        // Collego il vertice al suo precedente e al top.
+        _this3.updateNormal(_i + 1, _i, 1)
+        _this3.texCoord.push(angleITex * angleStep, 0.0, angleITex, 0.0, angleITex, 1.0)
+        // Collego il vertice al suo successivo e al centro basso.
+        _this3.updateNormal(_i, _i + 1, 0)
+        _this3.texCoord.push(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+      } else {
+        // Nel caso sia l'ultimo vertice allora lo collego col primo sulla circonferenza.
+        _this3.updateNormal(2, _i, 1)
+        _this3.texCoord.push(angleStep / (2 * Math.PI), 0.0, angleITex, 0.0, angleITex, 1.0)
+        _this3.updateNormal(_i, 2, 0)
+        _this3.texCoord.push(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+      }
+    }
     _this3.cameraPos = new Vector3([0.0, 0.0, 8.0])
     return _this3
   }
@@ -340,13 +340,13 @@ var Cylinder = (function(_Shape3) {
 
     // Itero da 0 a nDiv - 1 per inserire gli indici nel buffer.
     for (var k = 0; k < nDiv; k++) {
-      var _i = k + 2 // Indice che scorre i vertici della circonferenza inferiore.
-      var _j = _i + nDiv // Indice che scorre i vertici della circonferenza superiore.
+      var _i2 = k + 2 // Indice che scorre i vertici della circonferenza inferiore.
+      var _j = _i2 + nDiv // Indice che scorre i vertici della circonferenza superiore.
 
       // Se non stiamo considerando gli ultimi vertici sulle circonferenze.
       if (k < nDiv - 1) {
         // Disegnamo le due circonferenze come al solito.
-        _this4.indices.push(_i, _i + 1, 0)
+        _this4.indices.push(_i2, _i2 + 1, 0)
         _this4.indices.push(_j, _j + 1, 1)
 
         // Disegniamo la maglia costruendo quadrati formati da due triangoli.
@@ -359,16 +359,16 @@ var Cylinder = (function(_Shape3) {
          i       i+1
         */
 
-        _this4.indices.push(_i, _i + 1, _j)
-        _this4.indices.push(_j, _j + 1, _i + 1)
+        _this4.indices.push(_i2, _i2 + 1, _j)
+        _this4.indices.push(_j, _j + 1, _i2 + 1)
       } else {
         // Come al solito gli ultimi vertici sulle circonferenze vanno uniti coi primi.
         // Il primo vertice della circonferenza inferiore è 2.
         // Il primo vertice della circonferenza superiore è nDiv + 2.
-        _this4.indices.push(_i, 2, 0)
+        _this4.indices.push(_i2, 2, 0)
         _this4.indices.push(_j, nDiv + 2, 1)
 
-        _this4.indices.push(_i, 2, _j)
+        _this4.indices.push(_i2, 2, _j)
         _this4.indices.push(_j, nDiv + 2, 2)
       }
     }
@@ -383,14 +383,24 @@ var Cylinder = (function(_Shape3) {
 var Sphere = (function(_Shape4) {
   _inherits(Sphere, _Shape4)
 
+  _createClass(Sphere, [
+    {
+      key: 'getTexCoord',
+      value: function getTexCoord(idx) {
+        return [this.texSuppo[2 * idx], this.texSuppo[2 * idx + 1]]
+      },
+    },
+  ])
+
   function Sphere(nDiv, radius) {
     _classCallCheck(this, Sphere)
 
+    var _this5 = _possibleConstructorReturn(this, (Sphere.__proto__ || Object.getPrototypeOf(Sphere)).call(this))
+
+    _this5.texSuppo = []
     // Per disegnare una sfera abbiamo bisogno di nDiv^2 vertici.
     // Il ciclo for più esterno è quello che itera sull'angolo phi, ossia quello che ci fa passare da
     // una circonferenza alla sua consecutiva.
-    var _this5 = _possibleConstructorReturn(this, (Sphere.__proto__ || Object.getPrototypeOf(Sphere)).call(this))
-
     for (var j = 0; j <= nDiv; j++) {
       // L'angolo phi è compresto tra 0 e Pi
       var phi = j * Math.PI / nDiv
@@ -410,22 +420,35 @@ var Sphere = (function(_Shape4) {
 
         var u = theta / (2 * Math.PI)
         var v = 1 - phi / Math.PI
-
-        _this5.texCoord.push(u, v)
+        _this5.texSuppo.push(u, v)
       }
     }
 
     // Inizializzazione degli indici, il significato dei cicli for è sempre lo stesso.
     for (var _j2 = 0; _j2 < nDiv; _j2++) {
-      for (var _i2 = 0; _i2 < nDiv; _i2++) {
+      for (var _i3 = 0; _i3 < nDiv; _i3++) {
         // p1 è un punto su di una circonferenza.
-        var p1 = _j2 * (nDiv + 1) + _i2
+        var p1 = _j2 * (nDiv + 1) + _i3
         // p2 è il punto sulla circonferenza superiore a quella di p1, nella stessa posizione di p1.
         var p2 = p1 + (nDiv + 1)
 
         // I punti vanno uniti come nel cilindro per formare dei quadrati.
-        _this5.indices.push(p1, p2, p1 + 1)
-        _this5.indices.push(p1 + 1, p2, p2 + 1)
+        var triangle0 = [p1 + 1, p1, p2]
+        _this5.updateNormal.apply(_this5, triangle0)
+
+        triangle0.map(function(el) {
+          var _this5$texCoord
+
+          ;(_this5$texCoord = _this5.texCoord).push.apply(_this5$texCoord, _toConsumableArray(_this5.getTexCoord(el)))
+        })
+
+        var triangle1 = [p2, p2 + 1, p1 + 1]
+        _this5.updateNormal.apply(_this5, triangle1)
+        triangle1.map(function(el) {
+          var _this5$texCoord2
+
+          ;(_this5$texCoord2 = _this5.texCoord).push.apply(_this5$texCoord2, _toConsumableArray(_this5.getTexCoord(el)))
+        })
       }
     }
     return _this5
@@ -437,15 +460,25 @@ var Sphere = (function(_Shape4) {
 var Torus = (function(_Shape5) {
   _inherits(Torus, _Shape5)
 
+  _createClass(Torus, [
+    {
+      key: 'getTexCoord',
+      value: function getTexCoord(idx) {
+        return [this.texSuppo[2 * idx], this.texSuppo[2 * idx + 1]]
+      },
+    },
+  ])
+
   function Torus(nDiv, radius, radiusInner) {
     _classCallCheck(this, Torus)
 
+    var _this6 = _possibleConstructorReturn(this, (Torus.__proto__ || Object.getPrototypeOf(Torus)).call(this))
+
+    _this6.texSuppo = []
     // I vertici e gli indici del toro vengono calcolati come per la sfera
     // cambia solamente l'angolo phi che arriva fino a 2 PI
     // e chiaramente le coordinate dei vertici in funzione della
     // formula parametrica del toro
-
-    var _this6 = _possibleConstructorReturn(this, (Torus.__proto__ || Object.getPrototypeOf(Torus)).call(this))
 
     for (var j = 0; j <= nDiv; j++) {
       var phi = j * 2 * Math.PI / nDiv
@@ -461,17 +494,31 @@ var Torus = (function(_Shape5) {
         var v = theta / (2 * Math.PI)
 
         _this6.vertices.push(x, y, z)
-        _this6.texCoord.push(u, v)
+        _this6.texSuppo.push(u, v)
       }
     }
 
     for (var _j3 = 0; _j3 < nDiv; _j3++) {
-      for (var _i3 = 0; _i3 < nDiv; _i3++) {
-        var p1 = _j3 * (nDiv + 1) + _i3
+      for (var _i4 = 0; _i4 < nDiv; _i4++) {
+        var p1 = _j3 * (nDiv + 1) + _i4
         var p2 = p1 + (nDiv + 1)
 
-        _this6.indices.push(p1, p2, p1 + 1)
-        _this6.indices.push(p1 + 1, p2, p2 + 1)
+        var triangle0 = [p1 + 1, p1, p2]
+        _this6.updateNormal.apply(_this6, triangle0)
+
+        triangle0.map(function(el) {
+          var _this6$texCoord
+
+          ;(_this6$texCoord = _this6.texCoord).push.apply(_this6$texCoord, _toConsumableArray(_this6.getTexCoord(el)))
+        })
+
+        var triangle1 = [p2, p2 + 1, p1 + 1]
+        _this6.updateNormal.apply(_this6, triangle1)
+        triangle1.map(function(el) {
+          var _this6$texCoord2
+
+          ;(_this6$texCoord2 = _this6.texCoord).push.apply(_this6$texCoord2, _toConsumableArray(_this6.getTexCoord(el)))
+        })
       }
     }
     return _this6
