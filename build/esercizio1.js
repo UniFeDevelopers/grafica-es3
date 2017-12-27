@@ -194,11 +194,9 @@ var Cone = (function(_Shape2) {
     var angleStep = 2 * Math.PI / nDiv
     var centre = [0.0, 0.0, 0.0]
     var top = [0.0, height, 0.0]
-
     ;(_this2$vertices = _this2.vertices).push.apply(_this2$vertices, centre)
     // TODO: Ci penso dopo.
     _this2.texCoord.push(0.5, 0.0)
-
     ;(_this2$vertices2 = _this2.vertices).push.apply(_this2$vertices2, top)
     // Il top sarà al centro sull'asse u, e al punto più alto nell'asse v.
     _this2.texCoord.push(0.5, 1.0)
@@ -249,10 +247,8 @@ var Cylinder = (function(_Shape3) {
     // Due centri, uno in basso ed uno in alto.
     var centreBottom = [0.0, 0.0, 0.0]
     var centreTop = [0.0, height, 0.0]
-
     ;(_this3$vertices = _this3.vertices).push.apply(_this3$vertices, centreBottom) // Indice 0
     _this3.texCoord.push(0.5, 0.0)
-
     ;(_this3$vertices2 = _this3.vertices).push.apply(_this3$vertices2, centreTop) // Indice 1
     _this3.texCoord.push(0.5, 1.0)
 
@@ -871,14 +867,14 @@ var initTextures = function initTextures(gl) {
 }
 
 var getImageURL = function getImageURL() {
-  var baseURL = './textures/'
+  var baseURL = './textures'
   var imgName = 'ash_uvgrid01'
 
   if (document.querySelector('input[name="texture-image"]:checked')) {
     imgName = document.querySelector('input[name="texture-image"]:checked').value
   }
 
-  return '' + baseURL + imgName + '.jpg'
+  return baseURL + '/' + imgName + '.jpg'
 }
 
 var loadTexture = function loadTexture(gl, texture, u_Sampler, image) {
