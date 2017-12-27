@@ -194,9 +194,11 @@ var Cone = (function(_Shape2) {
     var angleStep = 2 * Math.PI / nDiv
     var centre = [0.0, 0.0, 0.0]
     var top = [0.0, height, 0.0]
+
     ;(_this2$vertices = _this2.vertices).push.apply(_this2$vertices, centre)
     // TODO: Ci penso dopo.
     _this2.texCoord.push(0.5, 0.0)
+
     ;(_this2$vertices2 = _this2.vertices).push.apply(_this2$vertices2, top)
     // Il top sarà al centro sull'asse u, e al punto più alto nell'asse v.
     _this2.texCoord.push(0.5, 1.0)
@@ -247,8 +249,10 @@ var Cylinder = (function(_Shape3) {
     // Due centri, uno in basso ed uno in alto.
     var centreBottom = [0.0, 0.0, 0.0]
     var centreTop = [0.0, height, 0.0]
+
     ;(_this3$vertices = _this3.vertices).push.apply(_this3$vertices, centreBottom) // Indice 0
     _this3.texCoord.push(0.5, 0.0)
+
     ;(_this3$vertices2 = _this3.vertices).push.apply(_this3$vertices2, centreTop) // Indice 1
     _this3.texCoord.push(0.5, 1.0)
 
@@ -391,11 +395,15 @@ var Torus = (function(_Shape5) {
       for (var i = 0; i <= nDiv; i++) {
         var theta = i * 2 * Math.PI / nDiv
 
-        var x = Math.sin(phi) * (radius + radiusInner * Math.cos(theta))
-        var y = Math.cos(phi) * (radius + radiusInner * Math.cos(theta))
+        var x = Math.cos(phi) * (radius + radiusInner * Math.cos(theta))
+        var y = Math.sin(phi) * (radius + radiusInner * Math.cos(theta))
         var z = Math.sin(theta) * radiusInner
 
+        var u = phi / (2 * Math.PI)
+        var v = theta / (2 * Math.PI)
+
         _this5.vertices.push(x, y, z)
+        _this5.texCoord.push(u, v)
       }
     }
 
@@ -473,7 +481,7 @@ var main = function main() {
     cone: [100, 1, 2],
     cylinder: [100, 1, 2],
     sphere: [100, 1],
-    torus: [100, 1, 0.2],
+    torus: [100, 1, 0.4],
 
     //*********************************************************************
     // creo una GUI con dat.gui

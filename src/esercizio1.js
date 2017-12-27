@@ -276,11 +276,15 @@ class Torus extends Shape {
       for (let i = 0; i <= nDiv; i++) {
         let theta = i * 2 * Math.PI / nDiv
 
-        let x = Math.sin(phi) * (radius + radiusInner * Math.cos(theta))
-        let y = Math.cos(phi) * (radius + radiusInner * Math.cos(theta))
+        let x = Math.cos(phi) * (radius + radiusInner * Math.cos(theta))
+        let y = Math.sin(phi) * (radius + radiusInner * Math.cos(theta))
         let z = Math.sin(theta) * radiusInner
 
+        let u = phi / (2 * Math.PI)
+        let v = theta / (2 * Math.PI)
+
         this.vertices.push(x, y, z)
+        this.texCoord.push(u, v)
       }
     }
 
@@ -355,7 +359,7 @@ const main = () => {
     cone: [100, 1, 2],
     cylinder: [100, 1, 2],
     sphere: [100, 1],
-    torus: [100, 1, 0.2],
+    torus: [100, 1, 0.4],
   }
 
   //*********************************************************************
