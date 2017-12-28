@@ -107,7 +107,6 @@ var Shape = (function() {
     this.verticesToDraw = []
     this.normals = []
     this.texCoord = []
-    // this.indices = []
     this.cameraPos = new Vector3([0.0, 0.0, 6.0])
   }
 
@@ -126,7 +125,6 @@ var Shape = (function() {
         // si caricano i tre vertici nel buffer dei vertici da disegnare
         triangle.map(function(v) {
           var _verticesToDraw
-
           ;(_verticesToDraw = _this.verticesToDraw).push.apply(_verticesToDraw, _toConsumableArray(v))
         })
       },
@@ -149,14 +147,19 @@ var Shape = (function() {
     {
       key: 'loadTriangle',
       value: function loadTriangle(idx1, idx2, idx3, texCoord1, texCoord2, texCoord3) {
-        var _texCoord
+        var _this2 = this,
+          _texCoord
 
-        var triangle = [this.getVertex(idx1), this.getVertex(idx2), this.getVertex(idx3)]
+        var triangle = [idx1, idx2, idx3].map(function(idx) {
+          return _this2.getVertex(idx)
+        })
 
         // Dobbiamo caricare i vertici nel buffer da disegnare.
         this.updateVerticesToDraw(triangle)
+
         // Caricare le normali.
         this.updateNormal(triangle)
+
         // Caricare le texture.
         ;(_texCoord = this.texCoord).push.apply(
           _texCoord,
@@ -185,32 +188,56 @@ var Cube = (function(_Shape) {
     //  v2------v3
     // Coordinates
 
-    var _this2 = _possibleConstructorReturn(this, (Cube.__proto__ || Object.getPrototypeOf(Cube)).call(this))
-
-    _this2.numberVertices = 8
     // prettier-ignore
-    _this2.vertices = [1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, -1.0, 1.0, 1.0, -1.0, -1.0, 1.0, -1.0, -1.0, -1.0, -1.0];
+    var _this3 = _possibleConstructorReturn(this, (Cube.__proto__ || Object.getPrototypeOf(Cube)).call(this));
 
-    _this2.loadTriangle(0, 1, 2, [1.0, 1.0], [0.0, 1.0], [0.0, 0.0])
-    _this2.loadTriangle(2, 3, 0, [0.0, 0.0], [1.0, 0.0], [1.0, 1.0])
+    _this3.vertices = [
+      1.0,
+      1.0,
+      1.0,
+      -1.0,
+      1.0,
+      1.0,
+      -1.0,
+      -1.0,
+      1.0,
+      1.0,
+      -1.0,
+      1.0,
+      1.0,
+      -1.0,
+      -1.0,
+      1.0,
+      1.0,
+      -1.0,
+      -1.0,
+      1.0,
+      -1.0,
+      -1.0,
+      -1.0,
+      -1.0,
+    ]
 
-    _this2.loadTriangle(0, 3, 4, [0.0, 1.0], [0.0, 0.0], [1.0, 0.0])
-    _this2.loadTriangle(4, 5, 0, [1.0, 0.0], [1.0, 1.0], [0.0, 1.0])
+    _this3.loadTriangle(0, 1, 2, [1.0, 1.0], [0.0, 1.0], [0.0, 0.0])
+    _this3.loadTriangle(2, 3, 0, [0.0, 0.0], [1.0, 0.0], [1.0, 1.0])
 
-    _this2.loadTriangle(0, 5, 6, [1.0, 0.0], [1.0, 1.0], [0.0, 1.0])
-    _this2.loadTriangle(6, 1, 0, [0.0, 1.0], [0.0, 0.0], [1.0, 0.0])
+    _this3.loadTriangle(0, 3, 4, [0.0, 1.0], [0.0, 0.0], [1.0, 0.0])
+    _this3.loadTriangle(4, 5, 0, [1.0, 0.0], [1.0, 1.0], [0.0, 1.0])
 
-    _this2.loadTriangle(1, 6, 7, [1.0, 1.0], [0.0, 1.0], [0.0, 0.0])
-    _this2.loadTriangle(7, 2, 1, [0.0, 0.0], [1.0, 0.0], [1.0, 1.0])
+    _this3.loadTriangle(0, 5, 6, [1.0, 0.0], [1.0, 1.0], [0.0, 1.0])
+    _this3.loadTriangle(6, 1, 0, [0.0, 1.0], [0.0, 0.0], [1.0, 0.0])
 
-    _this2.loadTriangle(7, 4, 3, [0.0, 0.0], [1.0, 0.0], [1.0, 1.0])
-    _this2.loadTriangle(3, 2, 7, [1.0, 1.0], [0.0, 1.0], [0.0, 0.0])
+    _this3.loadTriangle(1, 6, 7, [1.0, 1.0], [0.0, 1.0], [0.0, 0.0])
+    _this3.loadTriangle(7, 2, 1, [0.0, 0.0], [1.0, 0.0], [1.0, 1.0])
 
-    _this2.loadTriangle(4, 7, 6, [1.0, 1.0], [0.0, 1.0], [0.0, 0.0])
-    _this2.loadTriangle(6, 5, 4, [0.0, 0.0], [1.0, 0.0], [1.0, 1.0])
+    _this3.loadTriangle(7, 4, 3, [0.0, 0.0], [1.0, 0.0], [1.0, 1.0])
+    _this3.loadTriangle(3, 2, 7, [1.0, 1.0], [0.0, 1.0], [0.0, 0.0])
 
-    _this2.cameraPos = new Vector3([0.0, 0.0, 7.0])
-    return _this2
+    _this3.loadTriangle(4, 7, 6, [1.0, 1.0], [0.0, 1.0], [0.0, 0.0])
+    _this3.loadTriangle(6, 5, 4, [0.0, 0.0], [1.0, 0.0], [1.0, 1.0])
+
+    _this3.cameraPos = new Vector3([0.0, 0.0, 7.0])
+    return _this3
   }
 
   return Cube
@@ -220,19 +247,18 @@ var Cone = (function(_Shape2) {
   _inherits(Cone, _Shape2)
 
   function Cone(nDiv, radius, height) {
-    var _this3$vertices, _this3$vertices2
+    var _this4$vertices, _this4$vertices2
 
     _classCallCheck(this, Cone)
 
-    var _this3 = _possibleConstructorReturn(this, (Cone.__proto__ || Object.getPrototypeOf(Cone)).call(this))
+    var _this4 = _possibleConstructorReturn(this, (Cone.__proto__ || Object.getPrototypeOf(Cone)).call(this))
 
     var numberVertices = nDiv + 2
     var angleStep = 2 * Math.PI / nDiv
     var centre = [0.0, 0.0, 0.0]
     var top = [0.0, height, 0.0]
-
-    ;(_this3$vertices = _this3.vertices).push.apply(_this3$vertices, centre)
-    ;(_this3$vertices2 = _this3.vertices).push.apply(_this3$vertices2, top)
+    ;(_this4$vertices = _this4.vertices).push.apply(_this4$vertices, centre)
+    ;(_this4$vertices2 = _this4.vertices).push.apply(_this4$vertices2, top)
 
     // genero tutti i vertici
     for (var i = 2, angle = 0; i < numberVertices; i++, angle += angleStep) {
@@ -240,24 +266,24 @@ var Cone = (function(_Shape2) {
       var z = Math.sin(angle) * radius
       var y = centre[1]
 
-      _this3.vertices.push(x, y, z)
+      _this4.vertices.push(x, y, z)
     }
 
     // Incomincio caricando le faccie verticali.
     for (var _i = 2; _i < numberVertices; _i++) {
       // Coordinate u e v dei vertici della base.
       var uvi = [-angleStep * (_i - 2) / (2 * Math.PI), 0.0]
+
       // Mentre verticalmente sarà:
       var uv1 = [uvi[0], 1.0]
+
       // E quello di i+1 sarà:
       if (_i < numberVertices - 1) {
         var uviplus1 = [-angleStep * (_i - 2 + 1) / (2 * Math.PI), 0.0]
-
-        _this3.loadTriangle(_i + 1, _i, 1, uviplus1, uvi, uv1)
+        _this4.loadTriangle(_i + 1, _i, 1, uviplus1, uvi, uv1)
       } else {
         var uv2 = [0.0, 0.0]
-
-        _this3.loadTriangle(2, _i, 1, uv2, uvi, uv1)
+        _this4.loadTriangle(2, _i, 1, uv2, uvi, uv1)
       }
     }
 
@@ -272,14 +298,13 @@ var Cone = (function(_Shape2) {
           0.5 + 1 / 2 * Math.sin(angleStep * (_i2 - 2 + 1)),
         ]
 
-        _this3.loadTriangle(_i2, _i2 + 1, 0, _uvi, _uviplus, uv0)
+        _this4.loadTriangle(_i2, _i2 + 1, 0, _uvi, _uviplus, uv0)
       } else {
         var _uv = [0.5 + 1 / 2 * Math.cos(0.0), 0.5 + 1 / 2 * Math.sin(0.0)]
-
-        _this3.loadTriangle(_i2, 2, 0, _uvi, _uv, uv0)
+        _this4.loadTriangle(_i2, 2, 0, _uvi, _uv, uv0)
       }
     }
-    return _this3
+    return _this4
   }
 
   return Cone
@@ -289,27 +314,26 @@ var Cylinder = (function(_Shape3) {
   _inherits(Cylinder, _Shape3)
 
   function Cylinder(nDiv, radius, height) {
-    var _this4$vertices, _this4$vertices2
+    var _this5$vertices, _this5$vertices2
 
     _classCallCheck(this, Cylinder)
 
-    var _this4 = _possibleConstructorReturn(this, (Cylinder.__proto__ || Object.getPrototypeOf(Cylinder)).call(this))
+    var _this5 = _possibleConstructorReturn(this, (Cylinder.__proto__ || Object.getPrototypeOf(Cylinder)).call(this))
 
     var angleStep = 2 * Math.PI / nDiv
 
     // Due centri, uno in basso ed uno in alto.
     var centreBottom = [0.0, 0.0, 0.0]
     var centreTop = [0.0, height, 0.0]
-
-    ;(_this4$vertices = _this4.vertices).push.apply(_this4$vertices, centreBottom) // Indice 0
-    ;(_this4$vertices2 = _this4.vertices).push.apply(_this4$vertices2, centreTop) // Indice 1
+    ;(_this5$vertices = _this5.vertices).push.apply(_this5$vertices, centreBottom) // Indice 0
+    ;(_this5$vertices2 = _this5.vertices).push.apply(_this5$vertices2, centreTop) // Indice 1
 
     // Carico dalla posizione 2 ad nDiv + 1 i vertici della circonferenza inferiore.
     for (var i = 0, angle = 0; i < nDiv; i++, angle += angleStep) {
       var x = Math.cos(angle) * radius
       var z = Math.sin(angle) * radius
 
-      _this4.vertices.push(x, centreBottom[1], z) // i ed è il vertice in basso
+      _this5.vertices.push(x, centreBottom[1], z) // i ed è il vertice in basso
     }
 
     // Carico dalla posizione nDiv + 2 ad 2*nDiv + 1 i vertici della circonferenza superiore
@@ -317,7 +341,7 @@ var Cylinder = (function(_Shape3) {
       var _x = Math.cos(_angle) * radius
       var _z = Math.sin(_angle) * radius
 
-      _this4.vertices.push(_x, centreTop[1], _z) // i ed è il vertice in basso
+      _this5.vertices.push(_x, centreTop[1], _z) // i ed è il vertice in basso
     }
 
     // Innanzitutto disegno come prima cosa, le due basi.
@@ -332,13 +356,13 @@ var Cylinder = (function(_Shape3) {
       if (k < nDiv - 1) {
         var uvijplus1 = [0.5 + 1 / 2 * Math.cos(angleStep * (_i3 + 1)), 0.5 + 1 / 2 * Math.sin(angleStep * (_i3 + 1))]
 
-        _this4.loadTriangle(_i3, _i3 + 1, 0, uvij, uvijplus1, uv01)
-        _this4.loadTriangle(_j, _j + 1, 1, uvij, uvijplus1, uv01)
+        _this5.loadTriangle(_i3, _i3 + 1, 0, uvij, uvijplus1, uv01)
+        _this5.loadTriangle(_j, _j + 1, 1, uvij, uvijplus1, uv01)
       } else {
         var uv2 = [0.5 + 1 / 2 * Math.cos(0.0), 0.5 + 1 / 2 * Math.sin(0.0)]
 
-        _this4.loadTriangle(_i3, 2, 0, uvij, uv2, uv01)
-        _this4.loadTriangle(_j, nDiv + 2, 1, uvij, uv2, uv01)
+        _this5.loadTriangle(_i3, 2, 0, uvij, uv2, uv01)
+        _this5.loadTriangle(_j, nDiv + 2, 1, uvij, uv2, uv01)
       }
     }
 
@@ -354,19 +378,19 @@ var Cylinder = (function(_Shape3) {
         var uviplus1 = [-angleStep * (_k + 1) / (2 * Math.PI), 0.0]
         var uvjplus1 = [uviplus1[0], 1.0]
 
-        _this4.loadTriangle(_i4, _i4 + 1, _j2, uvi, uviplus1, uvj)
-        _this4.loadTriangle(_j2, _j2 + 1, _i4 + 1, uvj, uvjplus1, uviplus1)
+        _this5.loadTriangle(_i4, _i4 + 1, _j2, uvi, uviplus1, uvj)
+        _this5.loadTriangle(_j2, _j2 + 1, _i4 + 1, uvj, uvjplus1, uviplus1)
       } else {
         var _uv2 = [0.0, 0.0]
         var uv2j = [0.0, 1.0]
 
-        _this4.loadTriangle(_i4, 2, _j2, uvi, _uv2, uvj)
-        _this4.loadTriangle(_j2, nDiv + 2, 2, uvj, uv2j, _uv2)
+        _this5.loadTriangle(_i4, 2, _j2, uvi, _uv2, uvj)
+        _this5.loadTriangle(_j2, nDiv + 2, 2, uvj, uv2j, _uv2)
       }
     }
 
-    _this4.cameraPos = new Vector3([0.0, 0.0, 10.0])
-    return _this4
+    _this5.cameraPos = new Vector3([0.0, 0.0, 10.0])
+    return _this5
   }
 
   return Cylinder
@@ -387,9 +411,9 @@ var Sphere = (function(_Shape4) {
   function Sphere(nDiv, radius) {
     _classCallCheck(this, Sphere)
 
-    var _this5 = _possibleConstructorReturn(this, (Sphere.__proto__ || Object.getPrototypeOf(Sphere)).call(this))
+    var _this6 = _possibleConstructorReturn(this, (Sphere.__proto__ || Object.getPrototypeOf(Sphere)).call(this))
 
-    _this5.texSuppo = []
+    _this6.texSuppo = []
     // Per disegnare una sfera abbiamo bisogno di nDiv^2 vertici.
     // Il ciclo for più esterno è quello che itera sull'angolo phi, ossia quello che ci fa passare da
     // una circonferenza alla sua consecutiva.
@@ -408,11 +432,11 @@ var Sphere = (function(_Shape4) {
         var y = Math.cos(phi)
         var z = Math.cos(theta) * Math.sin(phi)
 
-        _this5.vertices.push(radius * x, radius * y, radius * z)
+        _this6.vertices.push(radius * x, radius * y, radius * z)
 
         var u = theta / (2 * Math.PI)
         var v = 1 - phi / Math.PI
-        _this5.texSuppo.push(u, v)
+        _this6.texSuppo.push(u, v)
       }
     }
 
@@ -426,24 +450,22 @@ var Sphere = (function(_Shape4) {
 
         // I punti vanno uniti come nel cilindro per formare dei quadrati.
         var triangle0 = [p1 + 1, p1, p2]
-        _this5.updateNormal.apply(_this5, triangle0)
+        _this6.updateNormal.apply(_this6, triangle0)
 
         triangle0.map(function(el) {
-          var _this5$texCoord
-
-          ;(_this5$texCoord = _this5.texCoord).push.apply(_this5$texCoord, _toConsumableArray(_this5.getTexCoord(el)))
+          var _this6$texCoord
+          ;(_this6$texCoord = _this6.texCoord).push.apply(_this6$texCoord, _toConsumableArray(_this6.getTexCoord(el)))
         })
 
         var triangle1 = [p2, p2 + 1, p1 + 1]
-        _this5.updateNormal.apply(_this5, triangle1)
+        _this6.updateNormal.apply(_this6, triangle1)
         triangle1.map(function(el) {
-          var _this5$texCoord2
-
-          ;(_this5$texCoord2 = _this5.texCoord).push.apply(_this5$texCoord2, _toConsumableArray(_this5.getTexCoord(el)))
+          var _this6$texCoord2
+          ;(_this6$texCoord2 = _this6.texCoord).push.apply(_this6$texCoord2, _toConsumableArray(_this6.getTexCoord(el)))
         })
       }
     }
-    return _this5
+    return _this6
   }
 
   return Sphere
@@ -464,9 +486,9 @@ var Torus = (function(_Shape5) {
   function Torus(nDiv, radius, radiusInner) {
     _classCallCheck(this, Torus)
 
-    var _this6 = _possibleConstructorReturn(this, (Torus.__proto__ || Object.getPrototypeOf(Torus)).call(this))
+    var _this7 = _possibleConstructorReturn(this, (Torus.__proto__ || Object.getPrototypeOf(Torus)).call(this))
 
-    _this6.texSuppo = []
+    _this7.texSuppo = []
     // I vertici e gli indici del toro vengono calcolati come per la sfera
     // cambia solamente l'angolo phi che arriva fino a 2 PI
     // e chiaramente le coordinate dei vertici in funzione della
@@ -485,8 +507,8 @@ var Torus = (function(_Shape5) {
         var u = phi / (2 * Math.PI)
         var v = theta / (2 * Math.PI)
 
-        _this6.vertices.push(x, y, z)
-        _this6.texSuppo.push(u, v)
+        _this7.vertices.push(x, y, z)
+        _this7.texSuppo.push(u, v)
       }
     }
 
@@ -496,24 +518,22 @@ var Torus = (function(_Shape5) {
         var p2 = p1 + (nDiv + 1)
 
         var triangle0 = [p1 + 1, p1, p2]
-        _this6.updateNormal.apply(_this6, triangle0)
+        _this7.updateNormal.apply(_this7, triangle0)
 
         triangle0.map(function(el) {
-          var _this6$texCoord
-
-          ;(_this6$texCoord = _this6.texCoord).push.apply(_this6$texCoord, _toConsumableArray(_this6.getTexCoord(el)))
+          var _this7$texCoord
+          ;(_this7$texCoord = _this7.texCoord).push.apply(_this7$texCoord, _toConsumableArray(_this7.getTexCoord(el)))
         })
 
         var triangle1 = [p2, p2 + 1, p1 + 1]
-        _this6.updateNormal.apply(_this6, triangle1)
+        _this7.updateNormal.apply(_this7, triangle1)
         triangle1.map(function(el) {
-          var _this6$texCoord2
-
-          ;(_this6$texCoord2 = _this6.texCoord).push.apply(_this6$texCoord2, _toConsumableArray(_this6.getTexCoord(el)))
+          var _this7$texCoord2
+          ;(_this7$texCoord2 = _this7.texCoord).push.apply(_this7$texCoord2, _toConsumableArray(_this7.getTexCoord(el)))
         })
       }
     }
-    return _this6
+    return _this7
   }
 
   return Torus
@@ -539,7 +559,7 @@ var main = function main() {
   }
 
   // set default shape to cube and init
-  var shape = new Cube([255, 0, 0])
+  var shape = new Cube()
 
   var n = initVertexBuffers(gl, shape)
   if (n < 0) {
@@ -869,25 +889,11 @@ var main = function main() {
 
 var initVertexBuffers = function initVertexBuffers(gl, shape) {
   var verticesToDraw = new Float32Array(shape.verticesToDraw)
-  //const indices = new Uint16Array(shape.indices)
   var texCoord = new Float32Array(shape.texCoord)
 
   // Write the vertex property to buffers (coordinates, colors and normals)
   if (!initArrayBuffer(gl, 'a_Position', verticesToDraw, gl.FLOAT, 3)) return -1
   if (!initArrayBuffer(gl, 'a_TexCoord', texCoord, gl.FLOAT, 2)) return -1
-
-  /*
-  // Unbind the buffer object
-  gl.bindBuffer(gl.ARRAY_BUFFER, null)
-   // Write the indices to the buffer object
-  let indexBuffer = gl.createBuffer()
-  if (!indexBuffer) {
-    console.log('Failed to create the buffer object')
-    return false
-  }
-  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer)
-  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW)
-  */
 
   return verticesToDraw.length / 3
 }
@@ -913,10 +919,13 @@ var initArrayBuffer = function initArrayBuffer(gl, attribute, data, type, num) {
     return false
   }
   gl.vertexAttribPointer(a_attribute, num, type, false, 0, 0)
+
   // Enable the assignment of the buffer object to the attribute variable
   gl.enableVertexAttribArray(a_attribute)
 
-  // TODO: Ci vuole l'unbinding? Ciao Anto.
+  // Unbind the buffer object
+  gl.bindBuffer(gl.ARRAY_BUFFER, null)
+
   return true
 }
 

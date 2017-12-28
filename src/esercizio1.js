@@ -70,7 +70,6 @@ class Shape {
     this.verticesToDraw = []
     this.normals = []
     this.texCoord = []
-    // this.indices = []
     this.cameraPos = new Vector3([0.0, 0.0, 6.0])
   }
 
@@ -84,6 +83,7 @@ class Shape {
       this.verticesToDraw.push(...v)
     })
   }
+
   updateNormal(triangle) {
     // per poi calcolare la normale del triangolo
     let norm = getNormal(...triangle)
@@ -93,12 +93,14 @@ class Shape {
   }
 
   loadTriangle(idx1, idx2, idx3, texCoord1, texCoord2, texCoord3) {
-    let triangle = [this.getVertex(idx1), this.getVertex(idx2), this.getVertex(idx3)]
+    let triangle = [idx1, idx2, idx3].map(idx => this.getVertex(idx))
 
     // Dobbiamo caricare i vertici nel buffer da disegnare.
     this.updateVerticesToDraw(triangle)
+
     // Caricare le normali.
     this.updateNormal(triangle)
+
     // Caricare le texture.
     this.texCoord.push(...texCoord1, ...texCoord2, ...texCoord3)
   }
@@ -117,7 +119,6 @@ class Cube extends Shape {
     //  v2------v3
     // Coordinates
 
-    this.numberVertices = 8
     // prettier-ignore
     this.vertices = [
       1.0, 1.0, 1.0,
@@ -177,16 +178,16 @@ class Cone extends Shape {
     for (let i = 2; i < numberVertices; i++) {
       // Coordinate u e v dei vertici della base.
       let uvi = [-angleStep * (i - 2) / (2 * Math.PI), 0.0]
+
       // Mentre verticalmente sarà:
       let uv1 = [uvi[0], 1.0]
+
       // E quello di i+1 sarà:
       if (i < numberVertices - 1) {
         let uviplus1 = [-angleStep * (i - 2 + 1) / (2 * Math.PI), 0.0]
-
         this.loadTriangle(i + 1, i, 1, uviplus1, uvi, uv1)
       } else {
         let uv2 = [0.0, 0.0]
-
         this.loadTriangle(2, i, 1, uv2, uvi, uv1)
       }
     }
@@ -205,7 +206,6 @@ class Cone extends Shape {
         this.loadTriangle(i, i + 1, 0, uvi, uviplus1, uv0)
       } else {
         let uv2 = [0.5 + 1 / 2 * Math.cos(0.0), 0.5 + 1 / 2 * Math.sin(0.0)]
-
         this.loadTriangle(i, 2, 0, uvi, uv2, uv0)
       }
     }
@@ -422,7 +422,7 @@ const main = () => {
   }
 
   // set default shape to cube and init
-  let shape = new Cube([255, 0, 0])
+  let shape = new Cube()
 
   let n = initVertexBuffers(gl, shape)
   if (n < 0) {
@@ -627,26 +627,11 @@ const main = () => {
 
 const initVertexBuffers = (gl, shape) => {
   const verticesToDraw = new Float32Array(shape.verticesToDraw)
-  //const indices = new Uint16Array(shape.indices)
   const texCoord = new Float32Array(shape.texCoord)
 
   // Write the vertex property to buffers (coordinates, colors and normals)
   if (!initArrayBuffer(gl, 'a_Position', verticesToDraw, gl.FLOAT, 3)) return -1
   if (!initArrayBuffer(gl, 'a_TexCoord', texCoord, gl.FLOAT, 2)) return -1
-
-  /*
-  // Unbind the buffer object
-  gl.bindBuffer(gl.ARRAY_BUFFER, null)
-
-  // Write the indices to the buffer object
-  let indexBuffer = gl.createBuffer()
-  if (!indexBuffer) {
-    console.log('Failed to create the buffer object')
-    return false
-  }
-  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer)
-  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW)
-  */
 
   return verticesToDraw.length / 3
 }
@@ -672,10 +657,13 @@ const initArrayBuffer = (gl, attribute, data, type, num) => {
     return false
   }
   gl.vertexAttribPointer(a_attribute, num, type, false, 0, 0)
+
   // Enable the assignment of the buffer object to the attribute variable
   gl.enableVertexAttribArray(a_attribute)
 
-  // TODO: Ci vuole l'unbinding? Ciao Anto.
+  // Unbind the buffer object
+  gl.bindBuffer(gl.ARRAY_BUFFER, null)
+
   return true
 }
 
