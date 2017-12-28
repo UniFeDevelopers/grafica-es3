@@ -78,20 +78,29 @@ class Shape {
     return [this.vertices[3 * idx], this.vertices[3 * idx + 1], this.vertices[3 * idx + 2]]
   }
 
-  updateNormal(idx1, idx2, idx3) {
-    // passati 3 indici di vertici appartenenti ad un triangolo
-    let triangle = [this.getVertex(idx1), this.getVertex(idx2), this.getVertex(idx3)]
-
+  updateVerticesToDraw(triangle) {
     // si caricano i tre vertici nel buffer dei vertici da disegnare
     triangle.map(v => {
       this.verticesToDraw.push(...v)
     })
-
+  }
+  updateNormal(triangle) {
     // per poi calcolare la normale del triangolo
     let norm = getNormal(...triangle)
 
     // e si carica la normale per ogni vertice di tale triangolo
     this.normals.push(...norm, ...norm, ...norm)
+  }
+
+  loadTriangle(idx1, idx2, idx3, texCoord1, texCoord2, texCoord3) {
+    let triangle = [this.getVertex(idx1), this.getVertex(idx2), this.getVertex(idx3)]
+
+    // Dobbiamo caricare i vertici nel buffer da disegnare.
+    this.updateVerticesToDraw(triangle)
+    // Caricare le normali.
+    this.updateNormal(triangle)
+    // Caricare le texture.
+    this.texCoord.push(...texCoord1, ...texCoord2, ...texCoord3)
   }
 }
 
@@ -111,83 +120,42 @@ class Cube extends Shape {
     this.numberVertices = 8
     // prettier-ignore
     this.vertices = [
-      1.0, 1.0, 1.0,   -1.0, 1.0, 1.0,  -1.0,-1.0, 1.0,  1.0,-1.0, 1.0,  // v0-v1-v2-v3 front
-     1.0,-1.0,-1.0,   1.0, 1.0,-1.0,  // v0-v3-v4-v5 right
-     -1.0, 1.0,-1.0,  // v0-v5-v6-v1 up
-     -1.0,-1.0,-1.0,   // v1-v6-v7-v2 left
-       // v7-v4-v3-v2 down
-        // v4-v7-v6-v5 back
+      1.0, 1.0, 1.0,
+      -1.0, 1.0, 1.0,
+      -1.0,-1.0, 1.0,
+      1.0,-1.0, 1.0,  
+      1.0,-1.0,-1.0,  
+      1.0, 1.0,-1.0,  
+      -1.0, 1.0,-1.0,  
+      -1.0,-1.0,-1.0,  
     ]
 
-    // Normal
-    // prettier-ignore
-    /*
-    this.normals = [
-      0.0, 0.0, 1.0,   0.0, 0.0, 1.0,   0.0, 0.0, 1.0,   0.0, 0.0, 1.0,  // v0-v1-v2-v3 front
-      1.0, 0.0, 0.0,   1.0, 0.0, 0.0,   1.0, 0.0, 0.0,   1.0, 0.0, 0.0,  // v0-v3-v4-v5 right
-      0.0, 1.0, 0.0,   0.0, 1.0, 0.0,   0.0, 1.0, 0.0,   0.0, 1.0, 0.0,  // v0-v5-v6-v1 up
-      -1.0, 0.0, 0.0,  -1.0, 0.0, 0.0,  -1.0, 0.0, 0.0,  -1.0, 0.0, 0.0,  // v1-v6-v7-v2 left
-      0.0,-1.0, 0.0,   0.0,-1.0, 0.0,   0.0,-1.0, 0.0,   0.0,-1.0, 0.0,  // v7-v4-v3-v2 down
-      0.0, 0.0,-1.0,   0.0, 0.0,-1.0,   0.0, 0.0,-1.0,   0.0, 0.0,-1.0   // v4-v7-v6-v5 back
-    ];
-    */
+    this.loadTriangle(0, 1, 2, [1.0, 1.0], [0.0, 1.0], [0.0, 0.0])
+    this.loadTriangle(2, 3, 0, [0.0, 0.0], [1.0, 0.0], [1.0, 1.0])
 
-    // prettier-ignore
-    /*
-    this.texCoord = [
-      1.0, 1.0,   0.0, 1.0,   0.0, 0.0,   1.0, 0.0,  // v0-v1-v2-v3 front
-      0.0, 1.0,   0.0, 0.0,   1.0, 0.0,   1.0, 1.0,  // v0-v3-v4-v5 right
-      1.0, 0.0,   1.0, 1.0,   0.0, 1.0,   0.0, 0.0,  // v0-v5-v6-v1 up
-      1.0, 1.0,   0.0, 1.0,   0.0, 0.0,   1.0, 0.0,  // v1-v6-v7-v2 left
-      0.0, 0.0,   1.0, 0.0,   1.0, 1.0,   0.0, 1.0,  // v7-v4-v3-v2 down
-      0.0, 0.0,   1.0, 0.0,   1.0, 1.0,   0.0, 1.0   // v4-v7-v6-v5 back
-    ]
-    */
+    this.loadTriangle(0, 3, 4, [0.0, 1.0], [0.0, 0.0], [1.0, 0.0])
+    this.loadTriangle(4, 5, 0, [1.0, 0.0], [1.0, 1.0], [0.0, 1.0])
 
-    this.updateNormal(0,1,2)
-    this.texCoord.push(1.0, 1.0, 0.0, 1.0, 0.0, 0.0)
-    this.updateNormal(2, 3, 0)
-    this.texCoord.push(0.0, 0.0, 1.0, 0.0, 1.0, 1.0)
+    this.loadTriangle(0, 5, 6, [1.0, 0.0], [1.0, 1.0], [0.0, 1.0])
+    this.loadTriangle(6, 1, 0, [0.0, 1.0], [0.0, 0.0], [1.0, 0.0])
 
-    this.updateNormal(0, 3, 4)
-    this.texCoord.push(0.0, 1.0, 0.0, 0.0, 1.0, 0.0)
-    this.updateNormal(4, 5, 0)
-    this.texCoord.push(1.0, 0.0, 1.0, 1.0, 0.0, 1.0)
+    this.loadTriangle(1, 6, 7, [1.0, 1.0], [0.0, 1.0], [0.0, 0.0])
+    this.loadTriangle(7, 2, 1, [0.0, 0.0], [1.0, 0.0], [1.0, 1.0])
 
-    this.updateNormal(0, 5, 6)
-    this.texCoord.push(1.0, 0.0, 1.0, 1.0, 0.0, 1.0)
-    this.updateNormal(6, 1, 0)
-    this.texCoord.push(0.0, 1.0, 0.0, 0.0, 1.0, 0.0)
+    this.loadTriangle(7, 4, 3, [0.0, 0.0], [1.0, 0.0], [1.0, 1.0])
+    this.loadTriangle(3, 2, 7, [1.0, 1.0], [0.0, 1.0], [0.0, 0.0])
 
-    this.updateNormal(1, 6, 7)
-    this.texCoord.push(1.0, 1.0, 0.0, 1.0, 0.0, 0.0)
-    this.updateNormal(7, 2, 1)
-    this.texCoord.push(0.0, 0.0, 1.0, 0.0, 1.0, 1.0)
-
-    this.updateNormal(7, 4, 3)
-    this.texCoord.push(0.0, 0.0, 1.0, 0.0, 1.0, 1.0)
-    this.updateNormal(3, 2, 7)
-    this.texCoord.push(1.0, 1.0, 0.0, 1.0, 0.0, 0.0)
-
-    this.updateNormal(4, 7, 6)
-    //this.texCoord.push(0.0, 0.0, 1.0, 0.0, 1.0, 1.0)
-    this.texCoord.push(1.0, 1.0, 0.0, 1.0, 0.0, 0.0)
-    this.updateNormal(6, 5, 4)
-    //this.texCoord.push(1.0, 1.0, 0.0, 1.0, 0.0, 0.0)
-    this.texCoord.push(0.0, 0.0, 1.0, 0.0, 1.0, 1.0)
+    this.loadTriangle(4, 7, 6, [1.0, 1.0], [0.0, 1.0], [0.0, 0.0])
+    this.loadTriangle(6, 5, 4, [0.0, 0.0], [1.0, 0.0], [1.0, 1.0])
 
     this.cameraPos = new Vector3([0.0, 0.0, 7.0])
   }
 }
 
 class Cone extends Shape {
-  getTexCoord(idx) {
-    return [this.texSuppo[2 * idx], this.texSuppo[2 * idx + 1]]
-  }
   constructor(nDiv, radius, height) {
     super()
 
-    this.texSuppo = []
     const numberVertices = nDiv + 2
     const angleStep = 2 * Math.PI / nDiv
     const centre = [0.0, 0.0, 0.0]
@@ -197,8 +165,7 @@ class Cone extends Shape {
     this.vertices.push(...top)
 
     // genero tutti i vertici
-    for (let i = 2; i < numberVertices; i++) {
-      let angle = i * angleStep
+    for (let i = 2, angle = 0; i < numberVertices; i++, angle += angleStep) {
       let x = Math.cos(angle) * radius
       let z = Math.sin(angle) * radius
       let y = centre[1]
@@ -206,62 +173,42 @@ class Cone extends Shape {
       this.vertices.push(x, y, z)
     }
 
-    // genero le texture della parte verticale.
-
-    for (let i = 0; i < numberVertices; i++) {
-      let u = i * angleStep / (2 * Math.PI)
-      let v = 0.0
-      this.texSuppo.push(u, v)
-    }
-
-    for (let i = 0; i < numberVertices; i++) {
-      let u = i * angleStep / (2 * Math.PI)
-      let v = 1.0
-      this.texSuppo.push(u, v)
-    }
-
-    for (let i = 0; i < numberVertices; i++) {
-      let u = 0.0
-      let v = 0.0
-      this.texSuppo.push(u, v)
-    }
-
-    // generiamo tutto.
+    // Incomincio caricando le faccie verticali.
     for (let i = 2; i < numberVertices; i++) {
+      // Coordinate u e v dei vertici della base.
+      let uvi = [-angleStep * (i - 2) / (2 * Math.PI), 0.0]
+      // Mentre verticalmente sarà:
+      let uv1 = [uvi[0], 1.0]
+      // E quello di i+1 sarà:
       if (i < numberVertices - 1) {
-        // Collego il vertice al suo precedente e al top.
-        this.updateNormal(i + 1, i, 1)
+        let uviplus1 = [-angleStep * (i - 2 + 1) / (2 * Math.PI), 0.0]
 
-        let triangle0 = [i + 1, i, nDiv + i]
-        triangle0.map(el => {
-          this.texCoord.push(...this.getTexCoord(el))
-        })
-
-        // Collego il vertice al suo successivo e al centro basso.
-        let triangle1 = [numberVertices + i, numberVertices + i + 1, numberVertices + 0]
-        this.updateNormal(...triangle1)
-
-        triangle1.map(el => {
-          this.texCoord.push(...this.getTexCoord(el))
-        })
+        this.loadTriangle(i + 1, i, 1, uviplus1, uvi, uv1)
       } else {
-        // Nel caso sia l'ultimo vertice allora lo collego col primo sulla circonferenza.
-        let triangle0 = [2, i, 1]
-        let triangle1 = [i, 2, 0]
+        let uv2 = [0.0, 0.0]
 
-        this.updateNormal(...triangle0)
-        this.updateNormal(...triangle1)
-
-        triangle0.map(el => {
-          this.texCoord.push(...this.getTexCoord(el))
-        })
-
-        triangle1.map(el => {
-          this.texCoord.push(...this.getTexCoord(el))
-        })
+        this.loadTriangle(2, i, 1, uv2, uvi, uv1)
       }
     }
-    this.cameraPos = new Vector3([0.0, 0.0, 8.0])
+
+    // Ora carico la base.
+    for (let i = 2; i < numberVertices; i++) {
+      let uvi = [0.5 + 1 / 2 * Math.cos(angleStep * (i - 2)), 0.5 + 1 / 2 * Math.sin(angleStep * (i - 2))]
+      const uv0 = [0.5, 0.5]
+
+      if (i < numberVertices - 1) {
+        let uviplus1 = [
+          0.5 + 1 / 2 * Math.cos(angleStep * (i - 2 + 1)),
+          0.5 + 1 / 2 * Math.sin(angleStep * (i - 2 + 1)),
+        ]
+
+        this.loadTriangle(i, i + 1, 0, uvi, uviplus1, uv0)
+      } else {
+        let uv2 = [0.5 + 1 / 2 * Math.cos(0.0), 0.5 + 1 / 2 * Math.sin(0.0)]
+
+        this.loadTriangle(i, 2, 0, uvi, uv2, uv0)
+      }
+    }
   }
 }
 
@@ -276,21 +223,14 @@ class Cylinder extends Shape {
     const centreTop = [0.0, height, 0.0]
 
     this.vertices.push(...centreBottom) // Indice 0
-    this.texCoord.push(0.5, 0.0)
-
     this.vertices.push(...centreTop) // Indice 1
-    this.texCoord.push(0.5, 1.0)
 
     // Carico dalla posizione 2 ad nDiv + 1 i vertici della circonferenza inferiore.
     for (let i = 0, angle = 0; i < nDiv; i++, angle += angleStep) {
       let x = Math.cos(angle) * radius
       let z = Math.sin(angle) * radius
 
-      let u = -angle / (2 * Math.PI)
-      let v = 0.0
-
       this.vertices.push(x, centreBottom[1], z) // i ed è il vertice in basso
-      this.texCoord.push(u, v)
     }
 
     // Carico dalla posizione nDiv + 2 ad 2*nDiv + 1 i vertici della circonferenza superiore
@@ -298,45 +238,51 @@ class Cylinder extends Shape {
       let x = Math.cos(angle) * radius
       let z = Math.sin(angle) * radius
 
-      let u = -angle / (2 * Math.PI)
-      let v = 1.0
-
       this.vertices.push(x, centreTop[1], z) // i ed è il vertice in basso
-      this.texCoord.push(u, v)
     }
 
-    // Itero da 0 a nDiv - 1 per inserire gli indici nel buffer.
+    // Innanzitutto disegno come prima cosa, le due basi.
     for (let k = 0; k < nDiv; k++) {
       let i = k + 2 // Indice che scorre i vertici della circonferenza inferiore.
       let j = i + nDiv // Indice che scorre i vertici della circonferenza superiore.
 
-      // Se non stiamo considerando gli ultimi vertici sulle circonferenze.
+      // Le coordinate uv sono uguali nelle due circonferenze.
+      let uvij = [0.5 + 1 / 2 * Math.cos(angleStep * i), 0.5 + 1 / 2 * Math.sin(angleStep * i)]
+      const uv01 = [0.5, 0.5]
+
       if (k < nDiv - 1) {
-        // Disegnamo le due circonferenze come al solito.
-        this.indices.push(i, i + 1, 0)
-        this.indices.push(j, j + 1, 1)
+        let uvijplus1 = [0.5 + 1 / 2 * Math.cos(angleStep * (i + 1)), 0.5 + 1 / 2 * Math.sin(angleStep * (i + 1))]
 
-        // Disegniamo la maglia costruendo quadrati formati da due triangoli.
-        /*
-         j      j+1
-          + - - +
-          |     |
-          |     |
-          + - - +
-         i       i+1
-        */
-
-        this.indices.push(i, i + 1, j)
-        this.indices.push(j, j + 1, i + 1)
+        this.loadTriangle(i, i + 1, 0, uvij, uvijplus1, uv01)
+        this.loadTriangle(j, j + 1, 1, uvij, uvijplus1, uv01)
       } else {
-        // Come al solito gli ultimi vertici sulle circonferenze vanno uniti coi primi.
-        // Il primo vertice della circonferenza inferiore è 2.
-        // Il primo vertice della circonferenza superiore è nDiv + 2.
-        this.indices.push(i, 2, 0)
-        this.indices.push(j, nDiv + 2, 1)
+        let uv2 = [0.5 + 1 / 2 * Math.cos(0.0), 0.5 + 1 / 2 * Math.sin(0.0)]
 
-        this.indices.push(i, 2, j)
-        this.indices.push(j, nDiv + 2, 2)
+        this.loadTriangle(i, 2, 0, uvij, uv2, uv01)
+        this.loadTriangle(j, nDiv + 2, 1, uvij, uv2, uv01)
+      }
+    }
+
+    // E poi disegno la parte verticale.
+    for (let k = 0; k < nDiv; k++) {
+      let i = k + 2 // Indice che scorre i vertici della circonferenza inferiore.
+      let j = i + nDiv // Indice che scorre i vertici della circonferenza superiore.
+
+      let uvi = [-angleStep * k / (2 * Math.PI), 0.0]
+      let uvj = [uvi[0], 1.0]
+
+      if (k < nDiv - 1) {
+        let uviplus1 = [-angleStep * (k + 1) / (2 * Math.PI), 0.0]
+        let uvjplus1 = [uviplus1[0], 1.0]
+
+        this.loadTriangle(i, i + 1, j, uvi, uviplus1, uvj)
+        this.loadTriangle(j, j + 1, i + 1, uvj, uvjplus1, uviplus1)
+      } else {
+        let uv2 = [0.0, 0.0]
+        let uv2j = [0.0, 1.0]
+
+        this.loadTriangle(i, 2, j, uvi, uv2, uvj)
+        this.loadTriangle(j, nDiv + 2, 2, uvj, uv2j, uv2)
       }
     }
 
@@ -663,7 +609,7 @@ const main = () => {
   const tick = () => {
     currentAngle = animate(currentAngle) // Update the rotation angle
     // Calculate the model matrix
-    modelMatrix.setRotate(currentAngle, 1, 0, 0) // Rotate around the axis
+    modelMatrix.setRotate(currentAngle, 0, 1, 1) // Rotate around the axis
 
     mvpMatrix.set(vpMatrix).multiply(modelMatrix)
     gl.uniformMatrix4fv(u_MvpMatrix, false, mvpMatrix.elements)
