@@ -125,7 +125,6 @@ var Shape = (function() {
         // si caricano i tre vertici nel buffer dei vertici da disegnare
         triangle.map(function(v) {
           var _verticesToDraw
-
           ;(_verticesToDraw = _this.verticesToDraw).push.apply(_verticesToDraw, _toConsumableArray(v))
         })
       },
@@ -258,7 +257,6 @@ var Cone = (function(_Shape2) {
     var angleStep = 2 * Math.PI / nDiv
     var centre = [0.0, 0.0, 0.0]
     var top = [0.0, height, 0.0]
-
     ;(_this4$vertices = _this4.vertices).push.apply(_this4$vertices, centre)
     ;(_this4$vertices2 = _this4.vertices).push.apply(_this4$vertices2, top)
 
@@ -328,7 +326,6 @@ var Cylinder = (function(_Shape3) {
     // Due centri, uno in basso ed uno in alto.
     var centreBottom = [0.0, 0.0, 0.0]
     var centreTop = [0.0, height, 0.0]
-
     ;(_this5$vertices = _this5.vertices).push.apply(_this5$vertices, centreBottom) // Indice 0
     ;(_this5$vertices2 = _this5.vertices).push.apply(_this5$vertices2, centreTop) // Indice 1
 
@@ -568,7 +565,7 @@ var main = function main() {
   }
 
   // Set the clear color and enable the depth test
-  gl.clearColor(0, 0, 0, 1)
+  gl.clearColor(0.5, 0.5, 0.5, 1)
   gl.enable(gl.DEPTH_TEST)
 
   // Get the storage locations of uniform variables and so on

@@ -358,12 +358,12 @@ var Cylinder = (function(_Shape3) {
         var uvijplus1 = [0.5 + 1 / 2 * Math.cos(angleStep * (k + 1)), 0.5 + 1 / 2 * Math.sin(angleStep * (k + 1))]
 
         _this5.loadTriangle(_i2, _i2 + 1, 0, uvij, uvijplus1, uv01)
-        _this5.loadTriangle(_j, _j + 1, 1, uvij, uvijplus1, uv01)
+        _this5.loadTriangle(_j + 1, _j, 1, uvijplus1, uvij, uv01)
       } else {
         var uv2 = [0.5 + 1 / 2 * Math.cos(0.0), 0.5 + 1 / 2 * Math.sin(0.0)]
 
         _this5.loadTriangle(_i2, 2, 0, uvij, uv2, uv01)
-        _this5.loadTriangle(_j, nDiv + 2, 1, uvij, uv2, uv01)
+        _this5.loadTriangle(nDiv + 2, _j, 1, uv2, uvij, uv01)
       }
     }
 
@@ -379,13 +379,13 @@ var Cylinder = (function(_Shape3) {
         var uviplus1 = [-angleStep * (_k3 + 1) / (2 * Math.PI), 0.0]
         var uvjplus1 = [uviplus1[0], 1.0]
 
-        _this5.loadTriangle(_i3, _i3 + 1, _j2, uvi, uviplus1, uvj)
+        _this5.loadTriangle(_i3 + 1, _i3, _j2, uviplus1, uvi, uvj)
         _this5.loadTriangle(_j2, _j2 + 1, _i3 + 1, uvj, uvjplus1, uviplus1)
       } else {
         var _uv2 = [-1.0, 0.0]
         var uv2j = [-1.0, 1.0]
 
-        _this5.loadTriangle(_i3, 2, _j2, uvi, _uv2, uvj)
+        _this5.loadTriangle(2, _i3, _j2, _uv2, uvi, uvj)
         _this5.loadTriangle(_j2, nDiv + 2, 2, uvj, uv2j, _uv2)
       }
     }
@@ -594,10 +594,10 @@ var main = function main() {
   var normalMatrix = new Matrix4() // Transformation matrix for normals
 
   var shapeOptions = {
-    cone: [100, 1, 2],
-    cylinder: [100, 1, 2],
-    sphere: [100, 1],
-    torus: [100, 1, 0.4],
+    cone: [200, 1, 2],
+    cylinder: [200, 1, 2.5],
+    sphere: [200, 1],
+    torus: [200, 1, 0.4],
 
     //*********************************************************************
     // creo una GUI con dat.gui
@@ -870,7 +870,7 @@ var main = function main() {
   var tick = function tick() {
     currentAngle = animate(currentAngle) // Update the rotation angle
     // Calculate the model matrix
-    modelMatrix.setRotate(currentAngle, 1, 0, 0) // Rotate around the axis
+    modelMatrix.setRotate(currentAngle, 0, 1, 0) // Rotate around the axis
     gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements)
 
     mvpMatrix.set(vpMatrix).multiply(modelMatrix)

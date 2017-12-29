@@ -43,5 +43,5 @@ module.exports = function(grunt) {
   })
 
   grunt.registerTask('compile', ['sass', 'postcss'])
-  grunt.registerTask('default', ['watch'])
+  grunt.registerTask('default', ['compile', 'watch'])
 }

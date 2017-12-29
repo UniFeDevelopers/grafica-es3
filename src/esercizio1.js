@@ -418,7 +418,7 @@ const main = () => {
   }
 
   // Set the clear color and enable the depth test
-  gl.clearColor(0, 0, 0, 1)
+  gl.clearColor(0.5, 0.5, 0.5, 1)
   gl.enable(gl.DEPTH_TEST)
 
   // Get the storage locations of uniform variables and so on

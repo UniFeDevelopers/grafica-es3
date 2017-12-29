@@ -1,6 +1,6 @@
 body {
   margin: 0;
-  background: #000;
+  background: #7f7f7f;
   overflow: hidden;
   text-align: center;
   font-family: sans-serif;
@@ -17,14 +17,13 @@ body .radio-component {
   font-weight: 300;
   text-align: left;
   padding: 15px;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.3);
   color: #eee;
   border-radius: 10px;
 }
 body .radio-component .radio-component-title {
   margin: 0 0 10px;
   font-size: 1.15em;
-  color: #ccc;
 }
 body .link-esercizi {
   display: -webkit-box;
