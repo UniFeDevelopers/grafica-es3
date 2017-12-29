@@ -67,7 +67,7 @@ var vertexShaderSource =
 
 // Fragment shader program
 var fragmentShaderSource =
-  '\n  #ifdef GL_ES\n  precision mediump float;\n  #endif\n  \n  varying vec3 v_vertexPosition;\n  varying vec3 v_normal;\n\n  uniform vec3 u_LightPosition;\n  uniform vec3 u_LightColor;\n\n  uniform sampler2D u_Sampler;\n  varying vec2 v_TexCoord;\n\n  void main() {\n    float d = length(u_LightPosition - v_vertexPosition);\n    float atten = 1.0 / (0.01 * d * d);\n\n    vec3 lightDirection = normalize(u_LightPosition - v_vertexPosition);\n    float nDotL = max(dot(lightDirection, v_normal), 0.0);\n\n    vec3 diffuse = u_LightColor * vec3(texture2D(u_Sampler, v_TexCoord)) * nDotL;\n    gl_FragColor = vec4(atten * diffuse, 1.0);\n  }\n'
+  '\n  #ifdef GL_ES\n  precision mediump float;\n  #endif\n  \n  varying vec3 v_vertexPosition;\n  varying vec3 v_normal;\n\n  uniform vec3 u_LightPosition;\n  uniform vec3 u_LightColor;\n\n  uniform sampler2D u_Sampler;\n  varying vec2 v_TexCoord;\n\n  void main() {\n    vec3 lightDirection = normalize(u_LightPosition - v_vertexPosition);\n    float nDotL = max(dot(lightDirection, v_normal), 0.0);\n\n    vec3 diffuse  = u_LightColor * vec3(texture2D(u_Sampler, v_TexCoord)) * nDotL;\n\n    gl_FragColor = vec4(diffuse, 1.0);\n  }\n'
 
 var cross = function cross(edge1, edge2) {
   var n = []
@@ -125,7 +125,6 @@ var Shape = (function() {
         // si caricano i tre vertici nel buffer dei vertici da disegnare
         triangle.map(function(v) {
           var _verticesToDraw
-
           ;(_verticesToDraw = _this.verticesToDraw).push.apply(_verticesToDraw, _toConsumableArray(v))
         })
       },
@@ -258,7 +257,6 @@ var Cone = (function(_Shape2) {
     var angleStep = 2 * Math.PI / nDiv
     var centre = [0.0, 0.0, 0.0]
     var top = [0.0, height, 0.0]
-
     ;(_this4$vertices = _this4.vertices).push.apply(_this4$vertices, centre)
     ;(_this4$vertices2 = _this4.vertices).push.apply(_this4$vertices2, top)
 
@@ -328,7 +326,6 @@ var Cylinder = (function(_Shape3) {
     // Due centri, uno in basso ed uno in alto.
     var centreBottom = [0.0, 0.0, 0.0]
     var centreTop = [0.0, height, 0.0]
-
     ;(_this5$vertices = _this5.vertices).push.apply(_this5$vertices, centreBottom) // Indice 0
     ;(_this5$vertices2 = _this5.vertices).push.apply(_this5$vertices2, centreTop) // Indice 1
 
@@ -873,7 +870,7 @@ var main = function main() {
   var tick = function tick() {
     currentAngle = animate(currentAngle) // Update the rotation angle
     // Calculate the model matrix
-    modelMatrix.setRotate(currentAngle, 0, 1, 1) // Rotate around the axis
+    modelMatrix.setRotate(currentAngle, 1, 0, 0) // Rotate around the axis
     gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements)
 
     mvpMatrix.set(vpMatrix).multiply(modelMatrix)
@@ -896,10 +893,12 @@ var main = function main() {
 
 var initVertexBuffers = function initVertexBuffers(gl, shape) {
   var verticesToDraw = new Float32Array(shape.verticesToDraw)
+  var normals = new Float32Array(shape.normals)
   var texCoord = new Float32Array(shape.texCoord)
 
   // Write the vertex property to buffers (coordinates, colors and normals)
   if (!initArrayBuffer(gl, 'a_Position', verticesToDraw, gl.FLOAT, 3)) return -1
+  if (!initArrayBuffer(gl, 'a_Normal', normals, gl.FLOAT, 3)) return -1
   if (!initArrayBuffer(gl, 'a_TexCoord', texCoord, gl.FLOAT, 2)) return -1
 
   return verticesToDraw.length / 3

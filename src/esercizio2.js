@@ -48,14 +48,12 @@ const fragmentShaderSource = `
   varying vec2 v_TexCoord;
 
   void main() {
-    float d = length(u_LightPosition - v_vertexPosition);
-    float atten = 1.0 / (0.01 * d * d);
-
     vec3 lightDirection = normalize(u_LightPosition - v_vertexPosition);
     float nDotL = max(dot(lightDirection, v_normal), 0.0);
 
-    vec3 diffuse = u_LightColor * vec3(texture2D(u_Sampler, v_TexCoord)) * nDotL;
-    gl_FragColor = vec4(atten * diffuse, 1.0);
+    vec3 diffuse  = u_LightColor * vec3(texture2D(u_Sampler, v_TexCoord)) * nDotL;
+
+    gl_FragColor = vec4(diffuse, 1.0);
   }
 `
 
@@ -623,7 +621,7 @@ const main = () => {
   const tick = () => {
     currentAngle = animate(currentAngle) // Update the rotation angle
     // Calculate the model matrix
-    modelMatrix.setRotate(currentAngle, 0, 1, 1) // Rotate around the axis
+    modelMatrix.setRotate(currentAngle, 1, 0, 0) // Rotate around the axis
     gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements)
 
     mvpMatrix.set(vpMatrix).multiply(modelMatrix)
@@ -646,10 +644,12 @@ const main = () => {
 
 const initVertexBuffers = (gl, shape) => {
   const verticesToDraw = new Float32Array(shape.verticesToDraw)
+  const normals = new Float32Array(shape.normals)
   const texCoord = new Float32Array(shape.texCoord)
 
   // Write the vertex property to buffers (coordinates, colors and normals)
   if (!initArrayBuffer(gl, 'a_Position', verticesToDraw, gl.FLOAT, 3)) return -1
+  if (!initArrayBuffer(gl, 'a_Normal', normals, gl.FLOAT, 3)) return -1
   if (!initArrayBuffer(gl, 'a_TexCoord', texCoord, gl.FLOAT, 2)) return -1
 
   return verticesToDraw.length / 3
