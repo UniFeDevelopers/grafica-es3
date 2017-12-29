@@ -11,6 +11,13 @@ Zambello Nicola
 Partendo dal secondo esercizio sviluppato per il I gruppo di esercizi, sviluppate un’applicazione permetta di utilizzare il texture mapping con i seguenti solidi geometrici: cubo, sfera, cono, cilindro, toro, specificando nella sezione initBuffer delle varie geometrie l’associazione coordinate di texture-vertici. Esempi del risultato del corretto texture mapping sono riportate nella tabella presente nella pagina. L’applicazione deve permettere di selezionare la geometria per mezzo di menu gestito tramite dat.gui. Verificate il texture mapping con l’ausilio delle texture allegate all’esercizio.
 
 ## Esercizio 2
+Partendo dall’ esercizio n.1 sviluppate un’applicazione che permetta di modulare il texture mapping 2D combinandolo con un modello di shading che consideri solo la componente diffusa del modello di Phong come descritto dall’equazione:
+
+<pre>I = k<small><sub>D</sub></small>&nbsp;&sdot;&nbsp;L<small><sub>D</sub></small>&nbsp;&sdot;&nbsp;max(l &sdot; n, 0)</pre>
+
+dove:
+- kD è la componente diffusa del materiale rappresentato dal colore del frammento della texture,
+- LD è la componente diffusa della luce.
 
   
 ## Setup e sviluppo
