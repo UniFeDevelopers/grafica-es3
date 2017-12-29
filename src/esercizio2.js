@@ -278,12 +278,12 @@ class Cylinder extends Shape {
         let uvijplus1 = [0.5 + 1 / 2 * Math.cos(angleStep * (k + 1)), 0.5 + 1 / 2 * Math.sin(angleStep * (k + 1))]
 
         this.loadTriangle(i, i + 1, 0, uvij, uvijplus1, uv01)
-        this.loadTriangle(j, j + 1, 1, uvij, uvijplus1, uv01)
+        this.loadTriangle(j + 1, j, 1, uvijplus1, uvij, uv01)
       } else {
         let uv2 = [0.5 + 1 / 2 * Math.cos(0.0), 0.5 + 1 / 2 * Math.sin(0.0)]
 
         this.loadTriangle(i, 2, 0, uvij, uv2, uv01)
-        this.loadTriangle(j, nDiv + 2, 1, uvij, uv2, uv01)
+        this.loadTriangle(nDiv + 2, j, 1, uv2, uvij, uv01)
       }
     }
 
@@ -299,13 +299,13 @@ class Cylinder extends Shape {
         let uviplus1 = [-angleStep * (k + 1) / (2 * Math.PI), 0.0]
         let uvjplus1 = [uviplus1[0], 1.0]
 
-        this.loadTriangle(i, i + 1, j, uvi, uviplus1, uvj)
+        this.loadTriangle(i + 1, i, j, uviplus1, uvi, uvj)
         this.loadTriangle(j, j + 1, i + 1, uvj, uvjplus1, uviplus1)
       } else {
         let uv2 = [-1.0, 0.0]
         let uv2j = [-1.0, 1.0]
 
-        this.loadTriangle(i, 2, j, uvi, uv2, uvj)
+        this.loadTriangle(2, i, j, uv2, uvi, uvj)
         this.loadTriangle(j, nDiv + 2, 2, uvj, uv2j, uv2)
       }
     }
@@ -470,10 +470,10 @@ const main = () => {
   let normalMatrix = new Matrix4() // Transformation matrix for normals
 
   const shapeOptions = {
-    cone: [100, 1, 2],
-    cylinder: [100, 1, 2],
-    sphere: [100, 1],
-    torus: [100, 1, 0.4],
+    cone: [200, 1, 2],
+    cylinder: [200, 1, 2.5],
+    sphere: [200, 1],
+    torus: [200, 1, 0.4],
   }
 
   //*********************************************************************
@@ -621,7 +621,7 @@ const main = () => {
   const tick = () => {
     currentAngle = animate(currentAngle) // Update the rotation angle
     // Calculate the model matrix
-    modelMatrix.setRotate(currentAngle, 1, 0, 0) // Rotate around the axis
+    modelMatrix.setRotate(currentAngle, 0, 1, 0) // Rotate around the axis
     gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements)
 
     mvpMatrix.set(vpMatrix).multiply(modelMatrix)
