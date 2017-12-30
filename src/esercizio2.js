@@ -169,8 +169,8 @@ class Cube extends Shape {
     this.loadTriangle(7, 4, 3, [0.0, 0.0], [1.0, 0.0], [1.0, 1.0])
     this.loadTriangle(3, 2, 7, [1.0, 1.0], [0.0, 1.0], [0.0, 0.0])
 
-    this.loadTriangle(4, 7, 6, [1.0, 1.0], [0.0, 1.0], [0.0, 0.0])
-    this.loadTriangle(6, 5, 4, [0.0, 0.0], [1.0, 0.0], [1.0, 1.0])
+    this.loadTriangle(4, 7, 6, [0.0, 0.0], [1.0, 0.0], [1.0, 1.0])
+    this.loadTriangle(6, 5, 4, [1.0, 1.0], [0.0, 1.0], [0.0, 0.0])
 
     this.cameraPos = new Vector3([0.0, 0.0, 7.0])
   }
