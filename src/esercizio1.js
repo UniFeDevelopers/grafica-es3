@@ -50,6 +50,7 @@ const cross = (edge1, edge2) => {
   return n
 }
 
+// Funzione che dati tre vertici di un triangolo ne calcola la normale.
 const getNormal = (v1, v2, v3) => {
   let edge1 = []
   edge1[0] = v2[0] - v1[0]
@@ -64,19 +65,27 @@ const getNormal = (v1, v2, v3) => {
   return cross(edge1, edge2)
 }
 
+// Super classe di ogni figura, contiene i campi indispensabili per disegnare una figura e i metodi necessari ad aggiornare i campi.
+// Da notare che il codice è già ready per supportare l'illuminazione, che invece non è supportata dagli shaders.
 class Shape {
   constructor() {
+    // Array in cui sono presenti tutti i vertici che formano la figura.
     this.vertices = []
+    // Vertici da disegnare, array coerente con normals e texcCoord.
     this.verticesToDraw = []
+    // Normali associati a verticesToDraw.
     this.normals = []
+    // Coordinate di texture associate a verticesToDraw.
     this.texCoord = []
     this.cameraPos = new Vector3([0.0, 0.0, 6.0])
   }
 
+  // Funzione che dato un indice all'interno dell'array vertices ne ritorna il vertice corrispondente.
   getVertex(idx) {
     return [this.vertices[3 * idx], this.vertices[3 * idx + 1], this.vertices[3 * idx + 2]]
   }
 
+  // Funzione che dato un triangolo carica le posizioni dei vertici che lo formano all'interno di verticesToDraw.
   updateVerticesToDraw(triangle) {
     // si caricano i tre vertici nel buffer dei vertici da disegnare
     triangle.map(v => {
@@ -84,6 +93,7 @@ class Shape {
     })
   }
 
+  // Funzione che dato un triangolo ne calcola la normale e la carica in corrispondenza dei vertici che lo formano.
   updateNormal(triangle) {
     // per poi calcolare la normale del triangolo
     let norm = getNormal(...triangle)
@@ -92,6 +102,8 @@ class Shape {
     this.normals.push(...norm, ...norm, ...norm)
   }
 
+  // Funzione che dati tre vertici che formano un triangolo, e le corrispondenti coordinate di texture si occupa di
+  // aggiornare tutti i buffer necessari per disegnare la figura. E' l'unico metodo realmente utilizzato dall'utente.
   loadTriangle(idx1, idx2, idx3, texCoord1, texCoord2, texCoord3) {
     let triangle = [idx1, idx2, idx3].map(idx => this.getVertex(idx))
 
@@ -119,6 +131,7 @@ class Cube extends Shape {
     //  v2------v3
     // Coordinates
 
+    // Array con le coordinate dei vertici.
     // prettier-ignore
     this.vertices = [
       1.0, 1.0, 1.0,  // 0
@@ -131,6 +144,7 @@ class Cube extends Shape {
       -1.0,-1.0,-1.0, // 7
     ]
 
+    // Richiamiamo la funzione loadTriangle per disegnare le facce del cubo.
     this.loadTriangle(0, 1, 2, [1.0, 1.0], [0.0, 1.0], [0.0, 0.0])
     this.loadTriangle(2, 3, 0, [0.0, 0.0], [1.0, 0.0], [1.0, 1.0])
 
@@ -146,8 +160,8 @@ class Cube extends Shape {
     this.loadTriangle(7, 4, 3, [0.0, 0.0], [1.0, 0.0], [1.0, 1.0])
     this.loadTriangle(3, 2, 7, [1.0, 1.0], [0.0, 1.0], [0.0, 0.0])
 
-    this.loadTriangle(4, 7, 6, [1.0, 1.0], [0.0, 1.0], [0.0, 0.0])
-    this.loadTriangle(6, 5, 4, [0.0, 0.0], [1.0, 0.0], [1.0, 1.0])
+    this.loadTriangle(4, 7, 6, [0.0, 0.0], [1.0, 0.0], [1.0, 1.0])
+    this.loadTriangle(6, 5, 4, [1.0, 1.0], [0.0, 1.0], [0.0, 0.0])
 
     this.cameraPos = new Vector3([0.0, 0.0, 7.0])
   }
@@ -178,6 +192,8 @@ class Cone extends Shape {
     // Incomincio caricando la base.
     for (let k = 0; k < nDiv; k++) {
       let i = k + 2
+      // Le coordinate uv dei vertici della base sono calcolate utilizzando l'equazione di una circonferenza
+      // con raggio 1/2 e centro (0.5, 0.5)
       let uvi = [0.5 + 1 / 2 * Math.cos(angleStep * k), 0.5 + 1 / 2 * Math.sin(angleStep * k)]
       const uv0 = [0.5, 0.5]
 
@@ -186,6 +202,7 @@ class Cone extends Shape {
 
         this.loadTriangle(i, i + 1, 0, uvi, uviplus1, uv0)
       } else {
+        // L'ultimo vertice della circonferenza si ricollega con il primo che ha indice 2.
         let uv2 = [0.5 + 1 / 2 * Math.cos(0.0), 0.5 + 1 / 2 * Math.sin(0.0)]
 
         this.loadTriangle(i, 2, 0, uvi, uv2, uv0)
@@ -195,16 +212,18 @@ class Cone extends Shape {
     // Ora carico la parte verticale.
     for (let k = 0; k < nDiv; k++) {
       let i = k + 2
-      // Coordinate u e v dei vertici della base.
+      // La coordinata u è data in questo caso da -angle / (2*Pi), mentre la coordinata v è 0.0 per i vertici della base
+      // ed 1.0 per il vertice top.
       let uvi = [-angleStep * k / (2 * Math.PI), 0.0]
-      // Mentre verticalmente sarà:
       let uv1 = [uvi[0], 1.0]
+
       // E quello di i+1 sarà:
       if (k != nDiv - 1) {
         let uviplus1 = [-angleStep * (k + 1) / (2 * Math.PI), 0.0]
 
         this.loadTriangle(i + 1, i, 1, uviplus1, uvi, uv1)
       } else {
+        // L'ultimo vertice della circonferenza è il 2, la cui coordinata u è -1.0 in questo caso.
         let uv2 = [-1.0, 0.0]
 
         this.loadTriangle(2, i, 1, uv2, uvi, uv1)
@@ -247,7 +266,8 @@ class Cylinder extends Shape {
       let i = k + 2 // Indice che scorre i vertici della circonferenza inferiore.
       let j = i + nDiv // Indice che scorre i vertici della circonferenza superiore.
 
-      // Le coordinate uv sono uguali nelle due circonferenze.
+      // Le coordinate uv sono uguali nelle due circonferenze, l'equazione è sempre quella della circonferenza
+      // con r = 1/2 e centro = (0.5,0.5), è esattamente uguale a come abbiamo disegnato la base del cono.
       let uvij = [0.5 + 1 / 2 * Math.cos(angleStep * k), 0.5 + 1 / 2 * Math.sin(angleStep * k)]
       const uv01 = [0.5, 0.5]
 
@@ -255,16 +275,16 @@ class Cylinder extends Shape {
         let uvijplus1 = [0.5 + 1 / 2 * Math.cos(angleStep * (k + 1)), 0.5 + 1 / 2 * Math.sin(angleStep * (k + 1))]
 
         this.loadTriangle(i, i + 1, 0, uvij, uvijplus1, uv01)
-        this.loadTriangle(j, j + 1, 1, uvij, uvijplus1, uv01)
+        this.loadTriangle(j + 1, j, 1, uvijplus1, uvij, uv01)
       } else {
         let uv2 = [0.5 + 1 / 2 * Math.cos(0.0), 0.5 + 1 / 2 * Math.sin(0.0)]
 
         this.loadTriangle(i, 2, 0, uvij, uv2, uv01)
-        this.loadTriangle(j, nDiv + 2, 1, uvij, uv2, uv01)
+        this.loadTriangle(nDiv + 2, j, 1, uv2, uvij, uv01)
       }
     }
 
-    // E poi disegno la parte verticale.
+    // E poi disegno la parte verticale. Che è uguale alla parte verticale del cono.
     for (let k = 0; k < nDiv; k++) {
       let i = k + 2 // Indice che scorre i vertici della circonferenza inferiore.
       let j = i + nDiv // Indice che scorre i vertici della circonferenza superiore.
@@ -276,13 +296,13 @@ class Cylinder extends Shape {
         let uviplus1 = [-angleStep * (k + 1) / (2 * Math.PI), 0.0]
         let uvjplus1 = [uviplus1[0], 1.0]
 
-        this.loadTriangle(i, i + 1, j, uvi, uviplus1, uvj)
+        this.loadTriangle(i + 1, i, j, uviplus1, uvi, uvj)
         this.loadTriangle(j, j + 1, i + 1, uvj, uvjplus1, uviplus1)
       } else {
         let uv2 = [-1.0, 0.0]
         let uv2j = [-1.0, 1.0]
 
-        this.loadTriangle(i, 2, j, uvi, uv2, uvj)
+        this.loadTriangle(2, i, j, uv2, uvi, uvj)
         this.loadTriangle(j, nDiv + 2, 2, uvj, uv2j, uv2)
       }
     }
@@ -295,6 +315,7 @@ class Sphere extends Shape {
   getTexCoord(idx) {
     return [this.texSuppo[2 * idx], this.texSuppo[2 * idx + 1]]
   }
+
   constructor(nDiv, radius) {
     super()
     this.texSuppo = []
@@ -318,13 +339,14 @@ class Sphere extends Shape {
 
         this.vertices.push(radius * x, radius * y, radius * z)
 
+        // Mentre generiamo i vertici ne calcoliamo già le coordinate (u,v) che salviamo all'interno di un'array di supporto.
         let u = theta / (2 * Math.PI)
         let v = 1 - phi / Math.PI
         this.texSuppo.push(u, v)
       }
     }
 
-    // Inizializzazione degli indici, il significato dei cicli for è sempre lo stesso.
+    // Inizializzazione degli array, il significato dei cicli for è sempre lo stesso.
     for (let j = 0; j < nDiv; j++) {
       for (let i = 0; i < nDiv; i++) {
         // p1 è un punto su di una circonferenza.
@@ -333,6 +355,7 @@ class Sphere extends Shape {
         let p2 = p1 + (nDiv + 1)
 
         // I punti vanno uniti come nel cilindro per formare dei quadrati.
+        // Le coordinate di texture le recuperiamo dall'array di supporto texSuppo tramite il metodo getTexCoord(idx).
         this.loadTriangle(p1 + 1, p1, p2, this.getTexCoord(p1 + 1), this.getTexCoord(p1), this.getTexCoord(p2))
         this.loadTriangle(p2, p2 + 1, p1 + 1, this.getTexCoord(p2), this.getTexCoord(p2 + 1), this.getTexCoord(p1 + 1))
       }
@@ -363,6 +386,8 @@ class Torus extends Shape {
         let y = Math.sin(phi) * (radius + radiusInner * Math.cos(theta))
         let z = Math.sin(theta) * radiusInner
 
+        // Ci comportiamo esattamente come per la sfera, calcolando le coordinate di texture durante la generazione
+        // dei vertici e salvandole in un array di supporto.
         let u = phi / (2 * Math.PI)
         let v = theta / (2 * Math.PI)
 
@@ -371,6 +396,7 @@ class Torus extends Shape {
       }
     }
 
+    // Infine carichiamo i buffer tramite la funzione loadTriangle().
     for (let j = 0; j < nDiv; j++) {
       for (let i = 0; i < nDiv; i++) {
         let p1 = j * (nDiv + 1) + i
@@ -590,7 +616,7 @@ const main = () => {
   const tick = () => {
     currentAngle = animate(currentAngle) // Update the rotation angle
     // Calculate the model matrix
-    modelMatrix.setRotate(currentAngle, 0, 1, 1) // Rotate around the axis
+    modelMatrix.setRotate(currentAngle, 1, 1, 1) // Rotate around the axis
 
     mvpMatrix.set(vpMatrix).multiply(modelMatrix)
     gl.uniformMatrix4fv(u_MvpMatrix, false, mvpMatrix.elements)
