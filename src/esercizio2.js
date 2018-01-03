@@ -252,6 +252,8 @@ class Cone extends Shape {
         this.loadTriangle(2, i, 1, uv2, uvi, uv1)
       }
     }
+
+    this.cameraPos = new Vector3([0.0, 0.0, 8.0])
   }
 }
 

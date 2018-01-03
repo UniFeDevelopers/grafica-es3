@@ -61,6 +61,8 @@ function _classCallCheck(instance, Constructor) {
     - Zambello Nicola
 */
 
+// Ciò che cambia rispetto all'esercizio1 sono gli shaders, applichiamo il modello di Phong sostituendo
+// diffuseMat con il colore della texture.
 // Vertex shader program
 var vertexShaderSource =
   '\n  attribute vec4 a_Position;   // Vertex coordinates\n  attribute vec4 a_Normal;     // Vertex normal.\n  uniform mat4 u_MvpMatrix;    // Model-View-Projection Matrix\n  uniform mat4 u_ModelMatrix;\n  uniform mat4 u_NormalMatrix;\n\n  attribute vec2 a_TexCoord;\n\n  varying vec3 v_vertexPosition;\n  varying vec3 v_normal;\n\n  varying vec2 v_TexCoord;\n\n  void main() {\n    gl_Position = u_MvpMatrix * a_Position;\n\n    v_normal = normalize(vec3(u_NormalMatrix * a_Normal));\n    v_vertexPosition = vec3(u_ModelMatrix * a_Position);\n\n    v_TexCoord = a_TexCoord;\n  }\n'
@@ -99,16 +101,24 @@ var getNormal = function getNormal(v1, v2, v3) {
   return cross(edge1, edge2)
 }
 
+// Super classe di ogni figura, contiene i campi indispensabili per disegnare una figura e i metodi necessari ad aggiornare i campi.
+
 var Shape = (function() {
   function Shape() {
     _classCallCheck(this, Shape)
 
+    // Array in cui sono presenti tutti i vertici che formano la figura.
     this.vertices = []
+    // Vertici da disegnare, array coerente con normals e texcCoord.
     this.verticesToDraw = []
+    // Normali associati a verticesToDraw.
     this.normals = []
+    // Coordinate di texture associate a verticesToDraw.
     this.texCoord = []
     this.cameraPos = new Vector3([0.0, 0.0, 6.0])
   }
+
+  // Funzione che dato un indice all'interno dell'array vertices ne ritorna il vertice corrispondente.
 
   _createClass(Shape, [
     {
@@ -116,6 +126,8 @@ var Shape = (function() {
       value: function getVertex(idx) {
         return [this.vertices[3 * idx], this.vertices[3 * idx + 1], this.vertices[3 * idx + 2]]
       },
+
+      // Funzione che dato un triangolo carica le posizioni dei vertici che lo formano all'interno di verticesToDraw.
     },
     {
       key: 'updateVerticesToDraw',
@@ -128,6 +140,8 @@ var Shape = (function() {
           ;(_verticesToDraw = _this.verticesToDraw).push.apply(_verticesToDraw, _toConsumableArray(v))
         })
       },
+
+      // Funzione che dato un triangolo ne calcola la normale e la carica in corrispondenza dei vertici che lo formano.
     },
     {
       key: 'updateNormal',
@@ -143,6 +157,9 @@ var Shape = (function() {
           _toConsumableArray(norm).concat(_toConsumableArray(norm), _toConsumableArray(norm))
         )
       },
+
+      // Funzione che dati tre vertici che formano un triangolo, e le corrispondenti coordinate di texture si occupa di
+      // aggiornare tutti i buffer necessari per disegnare la figura. E' l'unico metodo realmente utilizzato dall'utente.
     },
     {
       key: 'loadTriangle',
@@ -188,6 +205,7 @@ var Cube = (function(_Shape) {
     //  v2------v3
     // Coordinates
 
+    // Array con le coordinate dei vertici.
     // prettier-ignore
     var _this3 = _possibleConstructorReturn(this, (Cube.__proto__ || Object.getPrototypeOf(Cube)).call(this));
 
@@ -218,6 +236,7 @@ var Cube = (function(_Shape) {
       -1.0,
     ]
 
+    // Richiamiamo la funzione loadTriangle per disegnare le facce del cubo.
     _this3.loadTriangle(0, 1, 2, [1.0, 1.0], [0.0, 1.0], [0.0, 0.0])
     _this3.loadTriangle(2, 3, 0, [0.0, 0.0], [1.0, 0.0], [1.0, 1.0])
 
@@ -233,8 +252,8 @@ var Cube = (function(_Shape) {
     _this3.loadTriangle(7, 4, 3, [0.0, 0.0], [1.0, 0.0], [1.0, 1.0])
     _this3.loadTriangle(3, 2, 7, [1.0, 1.0], [0.0, 1.0], [0.0, 0.0])
 
-    _this3.loadTriangle(4, 7, 6, [1.0, 1.0], [0.0, 1.0], [0.0, 0.0])
-    _this3.loadTriangle(6, 5, 4, [0.0, 0.0], [1.0, 0.0], [1.0, 1.0])
+    _this3.loadTriangle(4, 7, 6, [0.0, 0.0], [1.0, 0.0], [1.0, 1.0])
+    _this3.loadTriangle(6, 5, 4, [1.0, 1.0], [0.0, 1.0], [0.0, 0.0])
 
     _this3.cameraPos = new Vector3([0.0, 0.0, 7.0])
     return _this3
@@ -273,6 +292,8 @@ var Cone = (function(_Shape2) {
     // Incomincio caricando la base.
     for (var _k = 0; _k < nDiv; _k++) {
       var i = _k + 2
+      // Le coordinate uv dei vertici della base sono calcolate utilizzando l'equazione di una circonferenza
+      // con raggio 1/2 e centro (0.5, 0.5)
       var uvi = [0.5 + 1 / 2 * Math.cos(angleStep * _k), 0.5 + 1 / 2 * Math.sin(angleStep * _k)]
       var uv0 = [0.5, 0.5]
 
@@ -281,6 +302,7 @@ var Cone = (function(_Shape2) {
 
         _this4.loadTriangle(i, i + 1, 0, uvi, uviplus1, uv0)
       } else {
+        // L'ultimo vertice della circonferenza si ricollega con il primo che ha indice 2.
         var uv2 = [0.5 + 1 / 2 * Math.cos(0.0), 0.5 + 1 / 2 * Math.sin(0.0)]
 
         _this4.loadTriangle(i, 2, 0, uvi, uv2, uv0)
@@ -290,21 +312,25 @@ var Cone = (function(_Shape2) {
     // Ora carico la parte verticale.
     for (var _k2 = 0; _k2 < nDiv; _k2++) {
       var _i = _k2 + 2
-      // Coordinate u e v dei vertici della base.
+      // La coordinata u è data in questo caso da -angle / (2*Pi), mentre la coordinata v è 0.0 per i vertici della base
+      // ed 1.0 per il vertice top.
       var _uvi = [-angleStep * _k2 / (2 * Math.PI), 0.0]
-      // Mentre verticalmente sarà:
       var uv1 = [_uvi[0], 1.0]
+
       // E quello di i+1 sarà:
       if (_k2 != nDiv - 1) {
         var _uviplus = [-angleStep * (_k2 + 1) / (2 * Math.PI), 0.0]
 
         _this4.loadTriangle(_i + 1, _i, 1, _uviplus, _uvi, uv1)
       } else {
+        // L'ultimo vertice della circonferenza è il 2, la cui coordinata u è -1.0 in questo caso.
         var _uv = [-1.0, 0.0]
 
         _this4.loadTriangle(2, _i, 1, _uv, _uvi, uv1)
       }
     }
+
+    _this4.cameraPos = new Vector3([0.0, 0.0, 8.0])
     return _this4
   }
 
@@ -350,7 +376,8 @@ var Cylinder = (function(_Shape3) {
       var _i2 = k + 2 // Indice che scorre i vertici della circonferenza inferiore.
       var _j = _i2 + nDiv // Indice che scorre i vertici della circonferenza superiore.
 
-      // Le coordinate uv sono uguali nelle due circonferenze.
+      // Le coordinate uv sono uguali nelle due circonferenze, l'equazione è sempre quella della circonferenza
+      // con r = 1/2 e centro = (0.5,0.5), è esattamente uguale a come abbiamo disegnato la base del cono.
       var uvij = [0.5 + 1 / 2 * Math.cos(angleStep * k), 0.5 + 1 / 2 * Math.sin(angleStep * k)]
       var uv01 = [0.5, 0.5]
 
@@ -367,7 +394,7 @@ var Cylinder = (function(_Shape3) {
       }
     }
 
-    // E poi disegno la parte verticale.
+    // E poi disegno la parte verticale. Che è uguale alla parte verticale del cono.
     for (var _k3 = 0; _k3 < nDiv; _k3++) {
       var _i3 = _k3 + 2 // Indice che scorre i vertici della circonferenza inferiore.
       var _j2 = _i3 + nDiv // Indice che scorre i vertici della circonferenza superiore.
@@ -435,13 +462,14 @@ var Sphere = (function(_Shape4) {
 
         _this6.vertices.push(radius * x, radius * y, radius * z)
 
+        // Mentre generiamo i vertici ne calcoliamo già le coordinate (u,v) che salviamo all'interno di un'array di supporto.
         var u = theta / (2 * Math.PI)
         var v = 1 - phi / Math.PI
         _this6.texSuppo.push(u, v)
       }
     }
 
-    // Inizializzazione degli indici, il significato dei cicli for è sempre lo stesso.
+    // Inizializzazione degli array, il significato dei cicli for è sempre lo stesso.
     for (var _j3 = 0; _j3 < nDiv; _j3++) {
       for (var _i4 = 0; _i4 < nDiv; _i4++) {
         // p1 è un punto su di una circonferenza.
@@ -450,6 +478,7 @@ var Sphere = (function(_Shape4) {
         var p2 = p1 + (nDiv + 1)
 
         // I punti vanno uniti come nel cilindro per formare dei quadrati.
+        // Le coordinate di texture le recuperiamo dall'array di supporto texSuppo tramite il metodo getTexCoord(idx).
         _this6.loadTriangle(p1 + 1, p1, p2, _this6.getTexCoord(p1 + 1), _this6.getTexCoord(p1), _this6.getTexCoord(p2))
         _this6.loadTriangle(
           p2,
@@ -500,6 +529,8 @@ var Torus = (function(_Shape5) {
         var y = Math.sin(phi) * (radius + radiusInner * Math.cos(theta))
         var z = Math.sin(theta) * radiusInner
 
+        // Ci comportiamo esattamente come per la sfera, calcolando le coordinate di texture durante la generazione
+        // dei vertici e salvandole in un array di supporto.
         var u = phi / (2 * Math.PI)
         var v = theta / (2 * Math.PI)
 
@@ -508,6 +539,7 @@ var Torus = (function(_Shape5) {
       }
     }
 
+    // Infine carichiamo i buffer tramite la funzione loadTriangle().
     for (var _j4 = 0; _j4 < nDiv; _j4++) {
       for (var _i5 = 0; _i5 < nDiv; _i5++) {
         var p1 = _j4 * (nDiv + 1) + _i5
@@ -870,7 +902,7 @@ var main = function main() {
   var tick = function tick() {
     currentAngle = animate(currentAngle) // Update the rotation angle
     // Calculate the model matrix
-    modelMatrix.setRotate(currentAngle, 0, 1, 0) // Rotate around the axis
+    modelMatrix.setRotate(currentAngle, 1, 1, 0) // Rotate around the axis
     gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements)
 
     mvpMatrix.set(vpMatrix).multiply(modelMatrix)
